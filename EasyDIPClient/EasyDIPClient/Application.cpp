@@ -2,6 +2,9 @@
 
 
 extern Shader* bwShader;
+const char* vertexPath = "C:/Users/heide/Desktop/ICG/[ICG] Tarea #3 - 24981800/ICGTarea3/EasyDIPAPI/EasyDIPAPI/shaders/shader.vert";
+const char* fragmentPath = "C:/Users/heide/Desktop/ICG/[ICG] Tarea #3 - 24981800/ICGTarea3/EasyDIPAPI/EasyDIPAPI/shaders/shader.frag";
+
 
 Application::Application() {
 
@@ -65,9 +68,12 @@ Application::Application() {
 	// Setup Platform/Renderer bindings
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
-
-
 	//CG::Model model = CG::Load("../Models/modelo.obj", );
+	//CG::Load("C:/Users/heide/Desktop/ICG/cube.off");
+	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/Apple.off");
+	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/dragon.off");
+	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/teapot.off");
+	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/seashell.off");
 	//models.push_back(model);
 	//	Scene.LoadModel("pelota.obj")
 
@@ -108,7 +114,7 @@ void Application::MainLoop()
 	{
 		glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 		glViewport(0, 0, windowWidth, windowHeight);
-		glClearColor(0, 0, 0, 1);
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glfwPollEvents();
 
@@ -126,37 +132,49 @@ void Application::MainLoop()
 		ImGui::Render();
 		Render();
 
-
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(window);
 	}
 }
 
+
 void Application::Render()
 {
+	//std::cout << "is this happening outside?" << std::endl;
+	//Mesh* mesh = Mesh::Instance();
+	//if (bwShader) {
+	//	bwShader->use();
+	//	//glActiveTexture(0);
+	//	//glBindTexture(GL_TEXTURE_2D, texId);
+	//	//bwShader->setInt("tex", 0);
+	//	//bwShader->setFloat("test", test);
+	//	mesh->Bind();
+	//	mesh->Draw();
 
+	//}
 	Quad *quad = Quad::Instance();
 	if (bwShader) {
 		bwShader->use();
-		glActiveTexture(0);
-		glBindTexture(GL_TEXTURE_2D, texId);
-		bwShader->setInt("tex", 0);
-		bwShader->setFloat("test", test);
+		//glActiveTexture(0);
+		//glBindTexture(GL_TEXTURE_2D, texId);
+		//wShader->setInt("tex", 0);
+		//bwShader->setFloat("test", test);
 		quad->Bind();
 		quad->Draw();
 
 	}
 }
 
+
+
 void Application::ImGui()
 {
 
-	ImGui::SliderFloat("test", &test, 0, 1);
+	//ImGui::SliderFloat("test", &test, 0, 1);
+	
 
 	ImGui::Begin("Convolution Editor");
-
-
 	ImGui::Text("Color button with Picker:");
 	ImGui::SameLine(); HelpMarker("With the ImGuiColorEditFlags_NoInputs flag you can hide all the slider/text inputs.\nWith the ImGuiColorEditFlags_NoLabel flag you can pass a non-empty label which will only be used for the tooltip and picker popup.");
 
@@ -205,28 +223,32 @@ void Application::ImGui()
 	//	ImGui::SameLine();
 	//	//ImGui::InputText("imgFile")
 	//}
+	ImGui::FileBrowser fileDialog;
+	if (ImGui::Button("Load Image"))
+	{
+		fileDialog.Open();
+	}
+		fileDialog.Display();
 
-	//if (ImGui::Button("Load Image"))
-	//{
-	//	fileDialog.Open();
-	//}
-	//	fileDialog.Display();
 
-
-	//if (fileDialog.HasSelected())
-	//{
-	//	std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
-	//	
-	//	fileDialog.Close();
-	//	fileDialog.ClearSelected();
-	//}
+	if (fileDialog.HasSelected())
+	{
+		std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
+		
+		fileDialog.Close();
+		fileDialog.ClearSelected();
+	}
 
 
 	ImGui::End();
 
 }
 
-void Application::Init() {}
+void Application::Init() {
+	//Shader mainShader(vertexPath, fragmentPath, nullptr);
+	bwShader = new Shader(vertexPath, fragmentPath, nullptr);
+	//*bwShader = mainShader;
+}
 
 void Application::HelpMarker(const char* desc)
 {

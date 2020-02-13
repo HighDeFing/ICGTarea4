@@ -8,6 +8,8 @@
   <ItemGroup>
     <ClInclude Include="EasyDIPAPI\EDpch.h" />
     <ClInclude Include="EasyDIPAPI\Loaders.h" />
+    <ClInclude Include="EasyDIPAPI\Mesh.h" />
+    <ClInclude Include="EasyDIPAPI\Model.h" />
     <ClInclude Include="EasyDIPAPI\Quad.h" />
     <ClInclude Include="EasyDIPAPI\shaders\Shader.h">
       <Filter>shaders</Filter>
@@ -16,9 +18,19 @@
   <ItemGroup>
     <ClCompile Include="EasyDIPAPI\EDpch.cpp" />
     <ClCompile Include="EasyDIPAPI\Loaders.cpp" />
+    <ClCompile Include="EasyDIPAPI\Model.cpp" />
     <ClCompile Include="EasyDIPAPI\Quad.cpp" />
     <ClCompile Include="EasyDIPAPI\shaders\Shader.cpp">
       <Filter>shaders</Filter>
     </ClCompile>
+    <ClCompile Include="EasyDIPAPI\Mesh.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EasyDIPAPI\shaders\shader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="EasyDIPAPI\shaders\shader.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

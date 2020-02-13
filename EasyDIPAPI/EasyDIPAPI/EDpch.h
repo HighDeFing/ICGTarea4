@@ -14,6 +14,7 @@
 #include <filesystem>
 
 #include "Quad.h"
+#include "Mesh.h"
 #include "shaders/Shader.h"
 //Shader
 using RawData = unsigned char;
