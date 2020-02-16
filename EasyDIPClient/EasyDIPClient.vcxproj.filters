@@ -18,6 +18,30 @@
     <ClInclude Include="EasyDIPClient\imgui_impl_opengl3.h">
       <Filter>EasyDIPClient</Filter>
     </ClInclude>
+    <ClInclude Include="EasyDIPClient\imGuIZMOquat.h">
+      <Filter>EasyDIPClient</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyDIPClient\vgConfig.h">
+      <Filter>EasyDIPClient</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyDIPClient\vGizmo.h">
+      <Filter>EasyDIPClient</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyDIPClient\vGizmoMath.h">
+      <Filter>EasyDIPClient</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyDIPClient\vgMath.h">
+      <Filter>EasyDIPClient</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyDIPClient\im3d.h">
+      <Filter>EasyDIPClient</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyDIPClient\im3d_config.h">
+      <Filter>EasyDIPClient</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyDIPClient\im3d_math.h">
+      <Filter>EasyDIPClient</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EasyDIPClient\Application.cpp">
@@ -33,6 +57,12 @@
       <Filter>EasyDIPClient</Filter>
     </ClCompile>
     <ClCompile Include="EasyDIPClient\main.cpp">
+      <Filter>EasyDIPClient</Filter>
+    </ClCompile>
+    <ClCompile Include="EasyDIPClient\imGuIZMOquat.cpp">
+      <Filter>EasyDIPClient</Filter>
+    </ClCompile>
+    <ClCompile Include="EasyDIPClient\im3d.cpp">
       <Filter>EasyDIPClient</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,6 +9,10 @@
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imGuIZMOquat.h"
+#include "im3d.h"
+#include "im3d_math.h"
+#include "im3d_config.h"
 
 #include <stdio.h>
 #include <memory>

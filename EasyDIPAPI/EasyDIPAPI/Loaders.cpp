@@ -260,21 +260,21 @@ namespace CG
 		{
 			aux_vertex.Position = (vertices[k].Position - Centro) / glm::vec3(median_point);
 			vertices[k] = aux_vertex;
-			std::cout << "vertices" << glm::to_string(vertices[k].Position) << std::endl;
+			//std::cout << "vertices" << glm::to_string(vertices[k].Position) << std::endl;
 		}
-		std::cout << "Max vertex: " << glm::to_string(maxVertex) << '\n';
+		/*std::cout << "Max vertex: " << glm::to_string(maxVertex) << '\n';
 		std::cout << "Min vertex: " << glm::to_string(minVertex) << '\n';
 		std::cout << "Centro: " << glm::to_string(Centro) << '\n';
 		std::cout << "median_point: " << median_point << '\n';
 		std::cout << "triangle: "<< glm::to_string(aux_vertex_trian.Position) << '\n';
-		/*for (int k = 0;k < vertices.size();k++)
+		for (int k = 0;k < vertices.size();k++)
 		{
 			std::cout << "vertices" << glm::to_string(vertices[k].Position) << std::endl;
-		}*/
+		}
 		std::cout << vertices.size() << " ";
-		std::cout << vertices_trian.size();
+		std::cout << vertices_trian.size();*/
 		Mesh* mesh = Mesh::Instance();
-		mesh->MeshCreate(vertices_trian, indices);
+		mesh->MeshCreate(vertices, indices);
 	}
 
 }

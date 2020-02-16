@@ -95,12 +95,22 @@
   <ItemGroup>
     <ClInclude Include="EasyDIPClient\Application.h" />
     <ClInclude Include="EasyDIPClient\EDClientpch.h" />
+    <ClInclude Include="EasyDIPClient\im3d.h" />
+    <ClInclude Include="EasyDIPClient\im3d_config.h" />
+    <ClInclude Include="EasyDIPClient\im3d_math.h" />
+    <ClInclude Include="EasyDIPClient\imGuIZMOquat.h" />
     <ClInclude Include="EasyDIPClient\imgui_impl_glfw.h" />
     <ClInclude Include="EasyDIPClient\imgui_impl_opengl3.h" />
+    <ClInclude Include="EasyDIPClient\vGizmo.h" />
+    <ClInclude Include="EasyDIPClient\vGizmoMath.h" />
+    <ClInclude Include="EasyDIPClient\vgConfig.h" />
+    <ClInclude Include="EasyDIPClient\vgMath.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EasyDIPClient\Application.cpp" />
     <ClCompile Include="EasyDIPClient\EDClientpch.cpp" />
+    <ClCompile Include="EasyDIPClient\im3d.cpp" />
+    <ClCompile Include="EasyDIPClient\imGuIZMOquat.cpp" />
     <ClCompile Include="EasyDIPClient\imgui_impl_glfw.cpp" />
     <ClCompile Include="EasyDIPClient\imgui_impl_opengl3.cpp" />
     <ClCompile Include="EasyDIPClient\main.cpp" />

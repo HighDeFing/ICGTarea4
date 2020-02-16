@@ -4,7 +4,8 @@
 extern Shader* bwShader;
 const char* vertexPath = "C:/Users/heide/Desktop/ICG/[ICG] Tarea #3 - 24981800/ICGTarea3/EasyDIPAPI/EasyDIPAPI/shaders/shader.vert";
 const char* fragmentPath = "C:/Users/heide/Desktop/ICG/[ICG] Tarea #3 - 24981800/ICGTarea3/EasyDIPAPI/EasyDIPAPI/shaders/shader.frag";
-
+quat qRot = quat(1.f, 0.f, 0.f, 0.f);
+mat4 modelMatrix;
 
 Application::Application() {
 
@@ -70,7 +71,7 @@ Application::Application() {
 	ImGui_ImplOpenGL3_Init(glsl_version);
 	//CG::Model model = CG::Load("../Models/modelo.obj", );
 	//CG::Load("C:/Users/heide/Desktop/ICG/cube.off");
-	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/Apple.off");
+	CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/Apple.off");
 	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/dragon.off");
 	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/teapot.off");
 	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/seashell.off");
@@ -142,30 +143,30 @@ void Application::MainLoop()
 void Application::Render()
 {
 	//std::cout << "is this happening outside?" << std::endl;
-	//Mesh* mesh = Mesh::Instance();
-	//if (bwShader) {
-	//	bwShader->use();
-	//	//glActiveTexture(0);
-	//	//glBindTexture(GL_TEXTURE_2D, texId);
-	//	//bwShader->setInt("tex", 0);
-	//	//bwShader->setFloat("test", test);
-	//	mesh->Bind();
-	//	mesh->Draw();
-
-	//}
-	Quad *quad = Quad::Instance();
+	Mesh* mesh = Mesh::Instance();
 	if (bwShader) {
 		bwShader->use();
 		//glActiveTexture(0);
 		//glBindTexture(GL_TEXTURE_2D, texId);
-		//wShader->setInt("tex", 0);
+		//bwShader->setInt("tex", 0);
 		//bwShader->setFloat("test", test);
-		quad->Bind();
-		quad->Draw();
+		mesh->Bind();
+		mesh->Draw();
+		bwShader->setMat4("mModelView", modelMatrix);
 
 	}
-}
+	//Quad *quad = Quad::Instance();
+	//if (bwShader) {
+	//	bwShader->use();
+	//	//glActiveTexture(0);
+	//	//glBindTexture(GL_TEXTURE_2D, texId);
+	//	//wShader->setInt("tex", 0);
+	//	//bwShader->setFloat("test", test);
+	//	quad->Bind();
+	//	quad->Draw();
 
+	//}
+}
 
 
 void Application::ImGui()
@@ -185,7 +186,11 @@ void Application::ImGui()
 		"2,0",
 	};
 
+	//rotate
+	ImGui::gizmo3D("##gizmo1", qRot /*, size,  mode */);
+	modelMatrix = mat4_cast(qRot);
 
+	//Traslate, rotate, scale
 
 	for (size_t yy = 0, nn = 0; yy < heightConv; yy++)
 	{
@@ -223,7 +228,7 @@ void Application::ImGui()
 	//	ImGui::SameLine();
 	//	//ImGui::InputText("imgFile")
 	//}
-	ImGui::FileBrowser fileDialog;
+	/*ImGui::FileBrowser fileDialog;
 	if (ImGui::Button("Load Image"))
 	{
 		fileDialog.Open();
@@ -237,7 +242,7 @@ void Application::ImGui()
 		
 		fileDialog.Close();
 		fileDialog.ClearSelected();
-	}
+	}*/
 
 
 	ImGui::End();
