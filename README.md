@@ -20,3 +20,7 @@ Interfaz gráfica de la app que permite hacer un preview de todas las funciones 
 
 Acá solo se utiliza la API de EasyDIPAPI para trabajar en la app
 
+# Para ejecutar:
+
+Guardar en la carpeta Modelo el archivo a desplegar con el nombre `modelo.off` o `modelo.obj`
+
