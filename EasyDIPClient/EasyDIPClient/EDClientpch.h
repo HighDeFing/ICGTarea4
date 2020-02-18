@@ -5,6 +5,10 @@
 
 #include <imgui.h>
 #include <imfilebrowser.h>
+#include <iostream>
+#include <string>
+#include <Windows.h>
+#include <WinBase.h>
 
 
 #include "imgui_impl_glfw.h"

@@ -26,6 +26,7 @@ class Quad {
 	Quad();
 	~Quad();
 public:
+	glm::vec3 min, max;
 	void Draw();
 	void Bind();
 	static Quad* Instance();

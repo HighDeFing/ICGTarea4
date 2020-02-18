@@ -25,4 +25,15 @@
       <Filter>shaders</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="EasyDIPAPI\shaders\shader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="EasyDIPAPI\shaders\shader.geom">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="EasyDIPAPI\shaders\shader.vert">
+      <Filter>shaders</Filter>
+    </None>
+  </ItemGroup>
 </Project>

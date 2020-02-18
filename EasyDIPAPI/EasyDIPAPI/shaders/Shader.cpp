@@ -61,18 +61,17 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
 	checkCompileErrors(fragment, "FRAGMENT");
 	// if geometry shader is given, compile geometry shader
 	unsigned int geometry;
-#ifdef GL_GEOMETRY_SHADER
-
+//#ifdef GL_GEOMETRY_SHADER
 	if (geometryPath != nullptr)
 	{
 		const char* gShaderCode = geometryCode.c_str();
-		geometry = glCreateShader(GL_GEOMETRY_SHADER);
+		geometry = glCreateShader(GL_SHADER_TYPE);
 		glShaderSource(geometry, 1, &gShaderCode, NULL);
 		glCompileShader(geometry);
 		checkCompileErrors(geometry, "GEOMETRY");
 	}
 
-#endif // GL_GEOMETRY_SHADER
+//#endif // GL_GEOMETRY_SHADER
 
 	// shader Program
 	ID = glCreateProgram();

@@ -26,17 +26,11 @@
 
 using std::vector;
 
-class triangle {
-public:
-	glm::vec3 v0;
-	glm::vec3 v1;
-	glm::vec3 v2;
-};
-
 FILE* doc;
 
 namespace CG
 { 
+
 	void Load(const std::string path)
 	{
 		//if path termina en .obj
@@ -58,7 +52,187 @@ namespace CG
 	}
 
 	void LoadObj(const std::string path) {
-		std::cout << "ich bin in obj." << std::endl;
+
+		//path variables
+		std::string line;
+		std::string uncommented_file = "";
+		std::ifstream myfile(path);
+		std::stringstream ss;
+		std::string temp;
+		float found;
+		//vertex variables
+		float vertex[3];
+		unsigned int index[3];
+		unsigned int found_unsigned;
+		int v_i = 0;
+		int i_index = 0;
+		vector <glm::vec3> all_vertex;
+		glm::vec3 aux_vertex;
+		//end vertices variables
+		vector <Vertex> vertices;
+		Vertex aux_vertices;
+		vector <unsigned int> indices;
+		unsigned int aux_indices;
+
+		//center
+		glm::vec3 Centro;
+		glm::vec3 minVertex;
+		glm::vec3 maxVertex;
+		float median_point;
+
+
+		if (myfile.is_open())
+		{
+			while (std::getline(myfile, line))
+			{
+				// This is a comment
+				std::size_t found = line.find('#');
+				if (found != std::string::npos)
+				{
+					//std::cout << "This is a comment:" << line.substr(found + 1) << '\n';
+					uncommented_file += line.substr(0, found) + '\n';
+					//std::cout << line.substr(0, found) << '\n';
+					//ignore rest
+				}
+				else
+				{
+					found = line.find('s');
+					if (found != std::string::npos)
+					{
+						uncommented_file += line.substr(0, found) + '\n';
+					}
+					else
+					{
+						found = line.find('o');
+						if (found != std::string::npos)
+						{
+							uncommented_file += line.substr(0, found) + '\n';
+						}
+						else
+						{
+							found = line.find('g');
+							if (found != std::string::npos)
+							{
+								uncommented_file += line.substr(0, found) + '\n';
+							}
+							else
+							{
+								found = line.find('u');
+								if (found != std::string::npos)
+								{
+									uncommented_file += line.substr(0, found) + '\n';
+								}
+								else 
+								{
+									found = line.find('vt');
+									if (found != std::string::npos)
+									{
+										uncommented_file += line.substr(0, found) + '\n';
+									}
+									else 
+									{
+										found = line.find('m');
+										if (found != std::string::npos)
+										{
+											uncommented_file += line.substr(0, found) + '\n';
+										}
+										else 
+										{
+												uncommented_file += line + '\n';
+												//std::cout << line << '\n';
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+			}
+			myfile.close();
+		}
+		else std::cout << "Unable to open file";
+		std::cout << uncommented_file;
+		ss << uncommented_file;
+		std::size_t found_first = line.find('v');
+		while (!ss.eof())
+		{
+			ss >> line;
+			std::size_t found_first = line.find('v');
+			if (found_first != std::string::npos)
+			{
+
+				while (v_i < 3) {
+					ss >> line;
+					if (std::stringstream(line) >> found) {
+						//std::cout << " Else:" << line << '\n';
+						//std::cout << v_i << " Else: found:" << found << " ";
+						vertex[v_i] = found;
+					}
+					v_i++;
+				}
+				if (v_i == 3) {
+					//GET VERTEX and put then in vector all_vertex
+					aux_vertex = glm::vec3(vertex[0], vertex[1], vertex[2]);
+					aux_vertices.Position = glm::vec3(vertex[0], vertex[1], vertex[2]);
+					all_vertex.push_back(aux_vertex);
+					vertices.push_back(aux_vertices);
+					v_i = 0;
+					//std::cout << '\n';
+				}
+			}	
+			found_first = line.find('f');
+			if (found_first != std::string::npos)
+			{
+				while (i_index < 3) {
+					ss >> line;
+					if (std::stringstream(line) >> found_unsigned) {
+						//std::cout << found_unsigned;
+						index[i_index] = found_unsigned - 1;
+						//std::cout << index[i_index];
+					}
+					i_index++;
+				}
+				if (i_index == 3)
+				{
+					aux_indices = index[0];
+					indices.push_back(aux_indices);
+					aux_indices = index[1];
+					indices.push_back(aux_indices);
+					aux_indices = index[2];
+					indices.push_back(aux_indices);
+					i_index = 0;
+				}
+			}
+			
+		}
+
+		maxVertex = glm::vec3(vertices[0].Position.x, vertices[0].Position.y, vertices[0].Position.z);
+		minVertex = glm::vec3(vertices[0].Position.x, vertices[0].Position.y, vertices[0].Position.z);
+		for (int i = 0; i < vertices.size();i++)
+		{
+			maxVertex = glm::vec3(MAX(maxVertex.x, vertices[i].Position.x), MAX(maxVertex.y, vertices[i].Position.y), MAX(maxVertex.z, vertices[i].Position.z));
+			minVertex = glm::vec3(MIN(minVertex.x, vertices[i].Position.x), MIN(minVertex.y, vertices[i].Position.y), MIN(minVertex.z, vertices[i].Position.z));
+
+		}
+		Centro = (maxVertex + minVertex) / glm::vec3(2);
+		float median_pointMAX_MAX = MAX(maxVertex.z, MAX(maxVertex.x, maxVertex.y));
+		float median_pointMAX_MIN = MAX(minVertex.z, MAX(minVertex.x, minVertex.y));
+		median_point = ABS(MAX(median_pointMAX_MAX, median_pointMAX_MIN));
+		/*for (int k = 0; k < vertices_trian.size(); k++)
+		{
+			aux_vertex_trian.Position = (vertices_trian[k].Position - Centro) / glm::vec3(median_point);
+			vertices_trian[k] = aux_vertex_trian;
+			std::cout << "vertices" << glm::to_string(vertices_trian[k].Position) << std::endl;
+		}*/
+		for (int k = 0; k < vertices.size(); k++)
+		{
+			aux_vertices.Position = (vertices[k].Position - Centro) / glm::vec3(median_point);
+			vertices[k] = aux_vertices;
+			//std::cout << "vertices" << glm::to_string(vertices[k].Position) << std::endl;
+		}
+		Mesh* mesh = Mesh::Instance();
+		mesh->MeshCreate(vertices, indices);
 
 	}
 
@@ -66,9 +240,9 @@ namespace CG
 		std::cout << "ich bin in off." << std::endl;
 		vector <glm::vec3> all_vertex;
 		vector <glm::vec3> face_triangles;
-		vector <triangle> all_triangles;
+		vector <CG::triangle> all_triangles;
 
-		triangle aux_triangle;
+		CG::triangle aux_triangle;
 		int found;
 		int i_3 = 0;
 		int v_3 = 0;
@@ -101,6 +275,8 @@ namespace CG
 		glm::vec3 minVertex;
 		glm::vec3 maxVertex;
 		float median_point;
+
+		vector <glm::vec3> Face_normals;
 
 
 		if (myfile.is_open())
@@ -193,12 +369,12 @@ namespace CG
 								vertices_trian.push_back(aux_vertex_trian);
 
 								//vector de triangulos
-								aux_triangle.v0 = all_vertex[faces_index[0]];
+								/*aux_triangle.v0 = all_vertex[faces_index[0]];
 								aux_triangle.v1 = all_vertex[faces_index[k+1]];
-								aux_triangle.v2 = all_vertex[faces_index[k+2]];
+								aux_triangle.v2 = all_vertex[faces_index[k+2]];*/
 
 								//std::cout << glm::to_string(aux_triangle.v0) <<" "<< glm::to_string(aux_triangle.v1)<< " "<< glm::to_string(aux_triangle.v2)<< std::endl;
-								all_triangles.push_back(aux_triangle);
+								//all_triangles.push_back(aux_triangle);
 								k++;
 							}
 						}
@@ -220,11 +396,11 @@ namespace CG
 							vertices_trian.push_back(aux_vertex_trian);
 
 
-							aux_triangle.v0 = all_vertex[faces_index[0]];
+							/*aux_triangle.v0 = all_vertex[faces_index[0]];
 							aux_triangle.v1 = all_vertex[faces_index[1]];
-							aux_triangle.v2 = all_vertex[faces_index[2]];
+							aux_triangle.v2 = all_vertex[faces_index[2]];*/
 							//std::cout << glm::to_string(aux_triangle.v0) << " " << glm::to_string(aux_triangle.v1) << " " << glm::to_string(aux_triangle.v2) << std::endl;
-							all_triangles.push_back(aux_triangle);
+							//all_triangles.push_back(aux_triangle);
 						}
 						//std::cout <<'\n';
 						std::getline(ss, line);
@@ -262,6 +438,18 @@ namespace CG
 			vertices[k] = aux_vertex;
 			//std::cout << "vertices" << glm::to_string(vertices[k].Position) << std::endl;
 		}
+
+		//create triangles:
+		triangle auxtriang;
+		for (int k = 0; k < indices.size(); k+=3)
+		{
+			auxtriang.v0 = vertices[indices[k]].Position;
+			auxtriang.v1 = vertices[indices[k+1]].Position;
+			auxtriang.v2 = vertices[indices[k+2]].Position;
+			all_triangles.push_back(auxtriang);
+			//std::cout << glm::to_string(auxtriang.v0) <<","<< glm::to_string(auxtriang.v1) << ","<< glm::to_string(auxtriang.v2) << '\n';
+		}
+
 		/*std::cout << "Max vertex: " << glm::to_string(maxVertex) << '\n';
 		std::cout << "Min vertex: " << glm::to_string(minVertex) << '\n';
 		std::cout << "Centro: " << glm::to_string(Centro) << '\n';
@@ -273,8 +461,30 @@ namespace CG
 		}
 		std::cout << vertices.size() << " ";
 		std::cout << vertices_trian.size();*/
+
+		//do normals
+		glm::vec3 edge1, edge2;
+		for (int k = 0; k < all_triangles.size(); k++)
+		{
+			//std::cout << "vertices_trian: " << glm::to_string(all_triangles[k].v0) << glm::to_string(all_triangles[k].v1) << " " << glm::to_string(all_triangles[k].v2) << std::endl;
+			edge1 = all_triangles[k].v1 - all_triangles[k].v0;
+			edge2 = all_triangles[k].v2 - all_triangles[k].v1;
+			all_triangles[k].normal = glm::normalize(glm::cross(edge1,edge2));
+			std::cout << glm::to_string(all_triangles[k].normal) << '\n';
+		}
+
+		for (int k = 0; k < vertices.size(); k++)
+		{
+			vertices[k].Normal = all_triangles[k].normal;
+			//std::cout << "vertices" << glm::to_string(vertices[k].Position) << std::endl;
+		}
+
+
 		Mesh* mesh = Mesh::Instance();
 		mesh->MeshCreate(vertices, indices);
+		/*Quad* quad = Quad::Instance();
+		quad->min = glm::normalize(minVertex);
+		quad->max = glm::normalize(maxVertex);*/
 	}
 
 }

@@ -14,135 +14,41 @@ Quad::Quad() {
 	const float sz = 0.5f;
 	float quadVertices[] = {
 		// positions        	// texture Coords
-		 1.0,  0.0,  0.816494,
-		 0.0,  1.0,  0.816494,
-		-1.0,  0.0,  0.816494,
-		 0.0, -1.0,  0.816494,
-		 1.0,  0.0, 0.0,
-		 0.0,  1.0, 0.0,
-		-1.0,  0.0, 0.0,
-		 0.0, -1.0, 0.0
+		 min[0],  min[1],  min[2],
+		 min[0],  min[1],  max[2],
+		 min[0],  max[1],  min[2],
+		// min[0],  max[1],  max[2],
+		// max[0],  min[1],  min[2],
+		// max[0],  min[1],  max[2],
+		// max[0],  max[2],  min[2],
+		// max[0],  max[2],  max[2]
 	};
-	//first face
-	//first triangle
-	struct Vertex1 aux = { glm::vec3(1.0, 0.0, 0.816494) }; //0
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0,  1.0,  0.816494) }; //1
-	vertices1.push_back(aux);
-	aux = { glm::vec3(-1.0,  0.0,  0.816494) }; //2
-	vertices1.push_back(aux);
-	//second triangle
-	aux = { glm::vec3(0.0,  1.0,  0.816494) }; //0
-	vertices1.push_back(aux);
-	aux = { glm::vec3(-1.0,  0.0,  0.816494) }; //2
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0, -1.0,  0.816494) };  //3
-	vertices1.push_back(aux);
 
-	//second face
-	//first triangle
-	aux = { glm::vec3(0.0, -1.0, 0.0) };  //7
-	vertices1.push_back(aux);
-	aux = { glm::vec3(1.0,  0.0, 0.0) };  //4
-	vertices1.push_back(aux);
-	aux = { glm::vec3(1.0, 0.0, 0.816494) }; //0
-	vertices1.push_back(aux);
-	//second triangle
-	aux = { glm::vec3(0.0, -1.0, 0.0) };  //7
-	vertices1.push_back(aux);
-	aux = { glm::vec3(1.0, 0.0, 0.816494) }; //0
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0, -1.0,  0.816494) };  //3
-	vertices1.push_back(aux);
-	
-	//third face
-	//first triangle
-	aux = { glm::vec3(1.0,  0.0, 0.0) };  //4
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0,  1.0, 0.0) }; //5
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0,  1.0,  0.816494) }; //1
-	vertices1.push_back(aux);
-	//second triangle
-	aux = { glm::vec3(1.0,  0.0, 0.0) };  //4
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0,  1.0,  0.816494) }; //1
-	vertices1.push_back(aux);
-	aux = { glm::vec3(1.0, 0.0, 0.816494) }; //0
-	vertices1.push_back(aux);
+	//unsigned int indices[] = {  // note that we start from 0!
+	//0, 1, 2,
+	///*0, 2, 3,
+	//7, 4, 0, 
+	//7, 0, 3,
+	//4, 5, 1,
+	//4, 5, 0,
+	//5, 6, 2,
+	//5, 2, 1,
+	//3, 2, 6,
+	//3, 6, 7,
+	//6, 5, 4,
+	//6, 4, 7*/
+	//};
 
-	//fourth face
-	//first triangle
-	aux = { glm::vec3(0.0,  1.0, 0.0) }; //5
-	vertices1.push_back(aux);
-	aux = { glm::vec3(-1.0,  0.0, 0.0) }; //6
-	vertices1.push_back(aux);
-	aux = { glm::vec3(-1.0,  0.0,  0.816494) }; //2
-	vertices1.push_back(aux);
-	//second triangle
-	aux = { glm::vec3(0.0,  1.0, 0.0) }; //5
-	vertices1.push_back(aux);
-	aux = { glm::vec3(-1.0,  0.0,  0.816494) }; //2
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0,  1.0,  0.816494) }; //1
-	vertices1.push_back(aux);
-
-	//fifth face
-	//first triangle
-	aux = { glm::vec3(0.0, -1.0,  0.816494) };  //3
-	vertices1.push_back(aux);
-	aux = { glm::vec3(-1.0,  0.0,  0.816494) }; //2
-	vertices1.push_back(aux);
-	aux = { glm::vec3(-1.0,  0.0, 0.0) }; //6
-	vertices1.push_back(aux);
-	//second triangle
-	aux = { glm::vec3(0.0, -1.0,  0.816494) };  //3
-	vertices1.push_back(aux);
-	aux = { glm::vec3(-1.0,  0.0, 0.0) }; //6
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0, -1.0, 0.0) };  //7
-	vertices1.push_back(aux);
-	//sixth face
-	//first triangle
-	aux = { glm::vec3(-1.0,  0.0, 0.0) }; //6
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0,  1.0, 0.0) }; //5
-	vertices1.push_back(aux);
-	aux = { glm::vec3(1.0,  0.0, 0.0) };  //4
-	vertices1.push_back(aux);
-	//second triangle
-	aux = { glm::vec3(-1.0,  0.0, 0.0) }; //6
-	vertices1.push_back(aux);
-	aux = { glm::vec3(1.0,  0.0, 0.0) };  //4
-	vertices1.push_back(aux);
-	aux = { glm::vec3(0.0, -1.0, 0.0) };  //7
-	vertices1.push_back(aux);
-
+	float vertices[] = {
+		 0.5f,  0.5f, 0.0f,  // top right
+		 0.5f, -0.5f, 0.0f,  // bottom right
+		-0.5f, -0.5f, 0.0f,  // bottom left
+		-0.5f,  0.5f, 0.0f   // top left 
+	};
 	unsigned int indices[] = {  // note that we start from 0!
-	0, 1, 2,
-	0, 2, 3,
-	7, 4, 0, 
-	7, 0, 3,
-	4, 5, 1,
-	4, 5, 0,
-	5, 6, 2,
-	5, 2, 1,
-	3, 2, 6,
-	3, 6, 7,
-	6, 5, 4,
-	6, 4, 7
+		0, 1, 3,  // first Triangle
+		1, 2, 3   // second Triangle
 	};
-	for (int i = 0; i < (12*3);i++)
-	{
-		//std::cout << "q" << indices[i] << " ";
-		if ((i+1)% 3 == 0)
-		{
-			std::cout << '\n';
-		}
-		indices1.push_back(indices[i]);
-	}
-	std::cout << "size_indices" << indices1.size() << " ";
-	std::cout << "size_vertices" << vertices1.size() << " ";
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -150,14 +56,25 @@ Quad::Quad() {
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices1.size() * sizeof(Vertex), &vertices1[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices1.size() * sizeof(unsigned int), &indices1[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex1), (void*)0);
 
+	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
 	glBindVertexArray(0);
+
+
 
 }
 
@@ -175,14 +92,8 @@ void Quad::Draw()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertices1.size()*vertices1.size());
-	//glDrawElements(GL_TRIANGLES, indices1.size()*vertices1.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	//glBindVertexArray(0);
-	//glBindVertexArray(VAO);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//glDrawElements(GL_TRIANGLES, indices1.size(), GL_UNSIGNED_INT, 0);
-	//glDrawElements(GL_TRIANGLE_STRIP, indices1.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 	//glDrawArrays(GL_TRIANGLE_STRIP, 0, 8);
 }
 

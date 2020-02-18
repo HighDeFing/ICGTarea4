@@ -32,15 +32,20 @@ void Mesh::setupMesh()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
+	// vertex positions
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+	// vertex normals
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
 
 	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
 	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
 }
 
 Mesh::~Mesh() {
@@ -51,14 +56,60 @@ Mesh::~Mesh() {
 void Mesh::Bind()
 {
 	glBindVertexArray(VAO);
+	
 }
 
 void Mesh::Draw()
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	glEnable(GL_DEPTH_TEST);
+	if(back_face_culling)
+	{
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+	}
+	else
+	{
+		glDisable(GL_CULL_FACE);
+	}
+	if (mallado)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	} 
+	else 
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	if (points) 
+	{
+		glDrawElements(GL_POINTS, indices.size(), GL_UNSIGNED_INT, 0);
+	}
+	else
+	{
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	}
+		glBindVertexArray(0);
+}
+
+void Mesh::DrawNormals()
+{
+	glDrawElements(GL_LINE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
+}
+
+void Mesh::create_BoundingBox(glm::vec3 min, glm::vec3 max)
+{
+	float quadVertices[] = {
+		// positions        	// texture Coords
+		 min[0],  min[1],  min[2],
+		 min[0],  min[1],  min[2],
+		 min[0],  max[1],   min[2],
+		 min[0],  max[1],  max[2],
+		 max[0],  min[1],  min[2],
+		 max[0],  min[1],  max[2],
+		 max[0],  max[2],  min[2],
+		 max[0],  max[2],  max[2]
+	};
 }
 
 Mesh* Mesh::Instance() {
@@ -68,4 +119,10 @@ Mesh* Mesh::Instance() {
 	}
 
 	return instance;
+	return new Mesh();
 }
+
+//void Mesh::set_triangles(vector<CG::triangle> trian)
+//{
+//	triangles = trian;
+//}
