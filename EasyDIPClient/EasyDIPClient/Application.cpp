@@ -288,13 +288,16 @@ void Application::ImGui()
 	ImGui::ColorEdit4("color 1", col1);
 
 	//rotate
+	ImGui::Text("Red is X, Green is Y, Blue is Z");
 	ImGui::gizmo3D("##gizmo1", qRot /*, size,  mode */);
 	modelMatrix = mat4_cast(qRot);
 
 	//Traslate, scale
 	static float vec4fs[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
 	static float vec4ft[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	ImGui::Text("X, Y, Z");
 	ImGui::SliderFloat3("SCALE", vec4fs, 0.0f, 1.0f);
+	ImGui::Text("X, Y, Z");
 	ImGui::SliderFloat3("TRASLATE", vec4ft, -2.0f, 2.0f, "ratio = %.01f");
 	glm::vec3 auxs(vec4fs[0], vec4fs[1], vec4fs[2]);
 	glm::vec3 auxt(vec4ft[0], vec4ft[1], vec4ft[2]);
