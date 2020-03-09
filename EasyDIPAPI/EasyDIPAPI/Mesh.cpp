@@ -68,8 +68,10 @@ void Mesh::Bind()
 
 void Mesh::Draw()
 {
-	bwShader->setMat4("mModelView", modelMatrix);
-	bwShader->setMat4("projection", proj);
+	bwShader->setMat4("mModel", modelMatrix);
+	bwShader->setMat4("mView", view);
+	bwShader->setMat4("mProj", proj);
+	
 	if (zbuffer) {
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -132,6 +134,11 @@ void Mesh::create_BoundingBox(glm::vec3 min, glm::vec3 max)
 		 max[0],  max[2],  min[2],
 		 max[0],  max[2],  max[2]
 	};
+}
+
+void Mesh::setView(glm::mat4 input)
+{
+	view = input;
 }
 
 void Mesh::setmodelMatrix(glm::mat4 input)

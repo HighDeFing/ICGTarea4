@@ -38,6 +38,7 @@ public:
 	glm::vec4 colorpoints = { 0.0f,0.0f,0.0f,0.0f};
 	glm::mat4 modelMatrix;
 	glm::mat4 proj;
+	glm::mat4 view;
 	glm::quat Qrotacion;
 
 	float vec4fscale[4]= { 0.5f, 0.5f, 0.5f, 0.5f };
@@ -51,6 +52,7 @@ public:
 	void create_BoundingBox(glm::vec3 min, glm::vec3 max);
 	void setmodelMatrix(glm::mat4);
 	void setproj(glm::mat4);
+	void setView(glm::mat4);
 	//static Mesh* Instance();
 };
 #endif // !__ED_MESH__

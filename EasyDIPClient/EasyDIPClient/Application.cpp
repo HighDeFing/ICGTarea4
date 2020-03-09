@@ -1,4 +1,6 @@
 #include "Application.h"
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 #include <iostream>
 #include <string>
 #include <Windows.h>
@@ -8,7 +10,8 @@
 #include <codecvt>
 
 using std::string;
-
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 std::string openfilename()
 	{
@@ -80,6 +83,7 @@ const char* geometryPath = "./../EasyDIPAPI/EasyDIPAPI/shaders/shader.geom";
 
 quat qRot = quat(1.f, 0.f, 0.f, 0.f);
 mat4 modelMatrix;
+mat4 viewMatrix;
 static float col2[4] = { 0.4f,0.7f,0.0f,0.5f };
 static float col1[4] = { 0.2f,0.3f,0.3f,1.0f};
 static float col4[4] = { 0.0f,0.0f,0.0f,0.0f };
@@ -95,6 +99,26 @@ glm::mat4 orthogonal;
 static int picked = -1;
 
 std::vector <Mesh *> model;
+
+//CAMARA
+glm::mat4 view;
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+
+//MOUSE
+bool firstMouse = true;
+float yaw1 = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float pitch1 = 0.0f;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0 / 2.0;
+float fov = 45.0f;
+
+bool move;
 
 Application::Application() {
 
@@ -238,34 +262,103 @@ void Application::MainLoop()
 
 		
 		
-
+		// Get mouse position
+		float currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 		ImGui();
+		processInput();
+		if (move) {
+			glfwSetScrollCallback(window, scroll_callback);
+			glfwSetCursorPosCallback(window, cursor_position_callback);
+		}
 
 		// Rendering
 		ImGui::Render();
 		Render();
-
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(window);
 	}
 }
 
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+	lastX = xpos;
+	lastY = ypos;
+
+	float sensitivity = 0.1f; // change this value to your liking
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw1 += xoffset;
+	pitch1 += yoffset;
+
+	// make sure that when pitch is out of bounds, screen doesn't get flipped
+	if (pitch1 > 89.0f)
+		pitch1 = 89.0f;
+	if (pitch1 < -89.0f)
+		pitch1 = -89.0f;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw1)) * cos(glm::radians(pitch1));
+	front.y = sin(glm::radians(pitch1));
+	front.z = sin(glm::radians(yaw1)) * cos(glm::radians(pitch1));
+	cameraFront = glm::normalize(front);
+	if (!move) return;
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (fov >= 1.0f && fov <= 45.0f)
+		fov -= yoffset;
+	if (fov <= 1.0f)
+		fov = 1.0f;
+	if (fov >= 45.0f)
+		fov = 45.0f;
+	if (!move) return;
+}
+
+void Application::processInput()
+{
+
+	float cameraSpeed = 2.5f * deltaTime;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cameraPos += cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cameraPos -= cameraSpeed * cameraFront;
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+
+
+}
 
 void Application::Render()
 {
 	if (!orthos)
 	{
-		//Perspective
+		//Orthogonal
 		proj = glm::mat4(1.0f);
 		proj = glm::ortho(-(float)windowWidth / 800.0f, (float)windowWidth / 800.0f, -(float)windowHeight / 800.0f, (float)windowHeight / 800.0f, NCP, 1000.0f);
 	}
 	else
 	{
-		//Orthogonal
+		//Perspective
 		proj = glm::mat4(1.0f);
-		proj = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, NCP, 1000.0f);
+		proj = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, NCP, 1000.0f);
 	}
+	view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 	if (model.size() > 0) {
 		for (int i = 0; i < model.size(); i++)
 		{
@@ -277,6 +370,7 @@ void Application::Render()
 				//bwShader->setFloat("test", test);
 				model[i]->Bind();
 				model[i]->Draw();
+				model[i]->setView(view);
 				model[i]->setproj(proj);
 				//model[i]->colormesh = glm::vec4(col3[0], col3[1], col3[2], col3[3]);
 				//model[i]->colorpoints = glm::vec4(col4[0], col4[1], col4[2], col4[3]);
@@ -354,6 +448,7 @@ void Application::ImGui()
 	if (ImGui::DragFloat("Near Clipping Plane", &NCP, 0.01f));
 	ImGui::PopItemWidth();
 
+	ImGui::Checkbox("Move", &move);
 	if (texOGImg)
 	{
 		//ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));

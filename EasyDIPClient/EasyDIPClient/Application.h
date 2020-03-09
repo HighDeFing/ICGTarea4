@@ -30,6 +30,7 @@ public:
 	Application();
 	~Application();
 	
+	void processInput();
 	void MainLoop();
 	void Render();
 	void ImGui();
