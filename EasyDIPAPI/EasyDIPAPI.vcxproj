@@ -94,6 +94,7 @@
     <ClInclude Include="EasyDIPAPI\Mesh.h" />
     <ClInclude Include="EasyDIPAPI\Model.h" />
     <ClInclude Include="EasyDIPAPI\Quad.h" />
+    <ClInclude Include="EasyDIPAPI\obj_loader.h" />
     <ClInclude Include="EasyDIPAPI\shaders\Shader.h" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +103,7 @@
     <ClCompile Include="EasyDIPAPI\Mesh.cpp" />
     <ClCompile Include="EasyDIPAPI\Model.cpp" />
     <ClCompile Include="EasyDIPAPI\Quad.cpp" />
+    <ClCompile Include="EasyDIPAPI\obj_loader.cpp" />
     <ClCompile Include="EasyDIPAPI\shaders\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -111,11 +113,6 @@
     <ProjectReference Include="..\dependencies\glfw\GLFW.vcxproj">
       <Project>{154B857C-0182-860D-AA6E-6C109684020F}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="EasyDIPAPI\shaders\shader.frag" />
-    <None Include="EasyDIPAPI\shaders\shader.geom" />
-    <None Include="EasyDIPAPI\shaders\shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

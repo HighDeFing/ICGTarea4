@@ -1,5 +1,5 @@
 #include "EDpch.h"
-
+#include "Mesh.h"
 
 namespace CG
 {
@@ -10,7 +10,7 @@ namespace CG
 		glm::vec3 v2;
 		glm::vec3 normal;
 	};
-	void Load(const std::string path);
-	static void LoadObj(const std::string path);
-	static void LoadOff(const std::string path);
+	Mesh* Load(const std::string path);
+	static Mesh* LoadObj(const std::string path);
+	static Mesh* LoadOff(const std::string path);
 }

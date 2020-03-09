@@ -9,54 +9,90 @@
 
 using std::string;
 
-std::wstring openfilename(HWND owner = NULL) {
-	OPENFILENAME ofn;       // common dialog box structure
-	wchar_t szFile[260];       // buffer for file name
-	// HWND hwnd;              // owner window
-	HANDLE hf;              // file handle
-	// Initialize OPENFILENAME
-	ZeroMemory(&ofn, sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = owner;
-	ofn.lpstrFile = szFile;
-	// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
-	// use the contents of szFile to initialize itself.
-	ofn.lpstrFile[0] = '\0';
-	ofn.nMaxFile = sizeof(szFile);
-	//ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
-	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-	// Display the Open dialog box. 
+std::string openfilename()
+	{
+		OPENFILENAME ofn;
+		wchar_t fileName[MAX_PATH] = L"";
+		ZeroMemory(&ofn, sizeof(ofn));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = NULL;
+		ofn.lpstrFilter = L"All Files\0*.OBJ;*.OFF";
+		ofn.lpstrFile = fileName;
+		ofn.nMaxFile = MAX_PATH;
+		ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+		ofn.lpstrDefExt = L"";
+		std::string fileNameStr;
 
-	if (GetOpenFileName(&ofn) == TRUE)
-		hf = CreateFile(ofn.lpstrFile,
-			GENERIC_READ,
-			0,
-			(LPSECURITY_ATTRIBUTES)NULL,
-			OPEN_EXISTING,
-			FILE_ATTRIBUTE_NORMAL,
-			(HANDLE)NULL);
-	return szFile;
-}
+		if (GetOpenFileName(&ofn)){
+			std::wstring aux (fileName);
+			std::string str(aux.begin(), aux.end());
+			fileNameStr = str;
+		}
+
+		return fileNameStr;
+	}
+
+//
+//std::wstring openfilename(HWND owner = NULL) {
+//	OPENFILENAME ofn;       // common dialog box structure
+//	wchar_t szFile[260];       // buffer for file name
+//	// HWND hwnd;              // owner window
+//	HANDLE hf;              // file handle
+//	// Initialize OPENFILENAME
+//	ZeroMemory(&ofn, sizeof(ofn));
+//	ofn.lStructSize = sizeof(ofn);
+//	ofn.hwndOwner = owner;
+//	ofn.lpstrFile = szFile;
+//	// Set lpstrFile[0] to '\0' so that GetOpenFileName does not 
+//	// use the contents of szFile to initialize itself.
+//	ofn.lpstrFile[0] = '\0';
+//	ofn.nMaxFile = sizeof(szFile);
+//	//ofn.lpstrFilter = "All\0*.*\0Text\0*.TXT\0";
+//	ofn.nFilterIndex = 1;
+//	ofn.lpstrFileTitle = NULL;
+//	ofn.nMaxFileTitle = 0;
+//	ofn.lpstrInitialDir = NULL;
+//	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+//
+//	// Display the Open dialog box. 
+//
+//	if (GetOpenFileName(&ofn) == TRUE)
+//		hf = CreateFile(ofn.lpstrFile,
+//			GENERIC_READ,
+//			0,
+//			(LPSECURITY_ATTRIBUTES)NULL,
+//			OPEN_EXISTING,
+//			FILE_ATTRIBUTE_NORMAL,
+//			(HANDLE)NULL);
+//	return szFile;
+//}
 
 //"../../EasyDIPAPI/EasyDIPAPI/shaders/shader.frag"
 //"C:/Users/heide/Desktop/ICG/[ICG] Tarea #3 - 24981800/ICGTarea3/EasyDIPAPI/EasyDIPAPI/shaders/shader.geom"
 //"./../EasyDIPAPI/EasyDIPAPI/shaders/shader.geom"
-extern Shader* bwShader;
+
+extern Shader *bwShader;
+
 const char* vertexPath = "./../EasyDIPAPI/EasyDIPAPI/shaders/shader.vert";
 const char* fragmentPath = "./../EasyDIPAPI/EasyDIPAPI/shaders/shader.frag";
 const char* geometryPath = "./../EasyDIPAPI/EasyDIPAPI/shaders/shader.geom";
+
 quat qRot = quat(1.f, 0.f, 0.f, 0.f);
 mat4 modelMatrix;
 static float col2[4] = { 0.4f,0.7f,0.0f,0.5f };
 static float col1[4] = { 0.2f,0.3f,0.3f,1.0f};
+static float col4[4] = { 0.0f,0.0f,0.0f,0.0f };
+static float col3[4] = { 1.0f,1.0f,1.0f,1.0f };
+
+static float vec4fs[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
+static float vec4ft[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+bool Iwant_torotate = 0;
 bool orthos;
 glm::mat4 proj;
 glm::mat4 orthogonal;
+static int picked = -1;
 
 std::vector <Mesh *> model;
 
@@ -124,8 +160,8 @@ Application::Application() {
 	ImGui_ImplOpenGL3_Init(glsl_version);
 	//CG::Model model = CG::Load("../Models/modelo.obj", );
 	//CG::Load("C:/Users/heide/Desktop/ICG/cube.off");
-	CG::Load("./../Modelo/modelo.obj");
-	CG::Load("./../Modelo/modelo.off");
+	//CG::Load("./../Modelo/modelo.obj");
+	//CG::Load("./../Modelo/modelo.off");
 	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/Apple.off");
 	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/dragon.off");
 	//CG::Load("C:/Users/heide/Desktop/ICG/CasosDePrueba/files/teapot.off");
@@ -218,19 +254,39 @@ void Application::MainLoop()
 
 void Application::Render()
 {
-	//std::cout << "is this happening outside?" << std::endl;
-	Mesh* mesh = Mesh::Instance();
-	if (bwShader) {
-		bwShader->use();
-		//glActiveTexture(0);
-		//glBindTexture(GL_TEXTURE_2D, texId);
-		//bwShader->setInt("tex", 0);
-		//bwShader->setFloat("test", test);
-		mesh->Bind();
-		mesh->Draw();
-		//mesh->DrawNormals();
-		bwShader->setVec4("my_color", glm::vec4(col2[0], col2[1], col2[2], col2[3]));
-		bwShader->setMat4("mModelView", modelMatrix);
+	if (!orthos)
+	{
+		//Perspective
+		proj = glm::mat4(1.0f);
+		proj = glm::ortho(-(float)windowWidth / 800.0f, (float)windowWidth / 800.0f, -(float)windowHeight / 800.0f, (float)windowHeight / 800.0f, NCP, 1000.0f);
+	}
+	else
+	{
+		//Orthogonal
+		proj = glm::mat4(1.0f);
+		proj = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, NCP, 1000.0f);
+	}
+	if (model.size() > 0) {
+		for (int i = 0; i < model.size(); i++)
+		{
+			if (bwShader) {
+				bwShader->use();
+				//glActiveTexture(0);
+				//glBindTexture(GL_TEXTURE_2D, texId);
+				//bwShader->setInt("tex", 0);
+				//bwShader->setFloat("test", test);
+				model[i]->Bind();
+				model[i]->Draw();
+				model[i]->setproj(proj);
+				//model[i]->colormesh = glm::vec4(col3[0], col3[1], col3[2], col3[3]);
+				//model[i]->colorpoints = glm::vec4(col4[0], col4[1], col4[2], col4[3]);
+				//mesh->DrawNormals();
+				//model[i]->colorrelleno = glm::vec4(col2[0], col2[1], col2[2], col2[3]);
+				//bwShader->setVec4("my_color", glm::vec4(col2[0], col2[1], col2[2], col2[3]));
+				//bwShader->setMat4("mModelView", modelMatrix);
+				//bwShader->setMat4("projection", proj);
+			}
+		}
 	}
 	//Quad *quad = Quad::Instance();
 	//if (bwShader) {
@@ -257,9 +313,23 @@ void Application::ImGui()
 {
 
 	//ImGui::SliderFloat("test", &test, 0, 1);
-	
 
 	ImGui::Begin("Convolution Editor");
+	if (ImGui::Button("Load"))
+	{
+		string a = openfilename();
+		Mesh* mesh = new Mesh();
+		mesh = CG::Load(a);
+		model.push_back(mesh);
+		picked = model.size() - 1;
+		Iwant_torotate = false;
+	}
+
+	ImGui::Text("Backgound color button with Picker:");
+	ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
+	ImGui::ColorEdit4("color 1", col1);
+
+	ImGui::InputInt("Figured Picked", &picked);
 	//ImGui::Text("Color button with Picker:");
 	//ImGui::SameLine(); HelpMarker("With the ImGuiColorEditFlags_NoInputs flag you can hide all the slider/text inputs.\nWith the ImGuiColorEditFlags_NoLabel flag you can pass a non-empty label which will only be used for the tooltip and picker popup.");
 
@@ -279,58 +349,101 @@ void Application::ImGui()
 	//	ImGui::NewLine();
 	//}
 
-	ImGui::Text("Color button with Picker:");
-	ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
-	ImGui::ColorEdit4("color 2", col2);
 
-	ImGui::Text("Backgound color button with Picker:");
-	ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
-	ImGui::ColorEdit4("color 1", col1);
-
-	//rotate
-	ImGui::Text("Red is X, Green is Y, Blue is Z");
-	ImGui::gizmo3D("##gizmo1", qRot /*, size,  mode */);
-	modelMatrix = mat4_cast(qRot);
-
-	//Traslate, scale
-	static float vec4fs[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
-	static float vec4ft[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	ImGui::Text("X, Y, Z");
-	ImGui::SliderFloat3("SCALE", vec4fs, 0.0f, 1.0f);
-	ImGui::Text("X, Y, Z");
-	ImGui::SliderFloat3("TRASLATE", vec4ft, -2.0f, 2.0f, "ratio = %.01f");
-	glm::vec3 auxs(vec4fs[0], vec4fs[1], vec4fs[2]);
-	glm::vec3 auxt(vec4ft[0], vec4ft[1], vec4ft[2]);
-	modelMatrix = glm::translate(modelMatrix, auxt);
-	modelMatrix = glm::scale(modelMatrix, auxs);
-	
+	ImGui::PushItemWidth(100);
+	if (ImGui::DragFloat("Near Clipping Plane", &NCP, 0.01f));
+	ImGui::PopItemWidth();
 
 	if (texOGImg)
 	{
 		//ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
 	}
-	Mesh* mesh = Mesh::Instance();
-	ImGui::Checkbox("Mallado", &mesh->mallado);
-	ImGui::Checkbox("Puntos", &mesh->points);
-	ImGui::Checkbox("Back Face culling", &mesh->back_face_culling);
-	ImGui::Checkbox("Ortho", &orthos);
-	ImGui::Checkbox("Z-buffer", &mesh->zbuffer);
-
-	if (ImGui::Button("Load"))
+	if (!model.empty() && picked<model.size())
 	{
-		/*std::wstring s1 = openfilename();
-		std::string s2 = ws2s(s1);
-		char s[1024];
-		std::replace(s2.begin(), s2.end(), '\\', '/');
-		strncpy_s(s, s2.c_str(), sizeof(s));
-		s[sizeof(s) - 1] = 0;
-		if(!s2.empty())
-		{	
-			std::cout << s;
-			CG::Load(s);
-		}*/
-		//std::string s2 = "C:/Users/heide/Desktop/ICG/CasosDePrueba/files/teapot.off";
-		//CG::Load(s2);
+		//colors
+		col2[0] = model[picked]->colorrelleno[0];
+		col2[1] = model[picked]->colorrelleno[1];
+		col2[2] = model[picked]->colorrelleno[2];
+		col2[3] = model[picked]->colorrelleno[3];
+		ImGui::Text("Color fill button with Picker:");
+		ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
+		ImGui::ColorEdit4("color 2", col2);
+
+		col4[0] = model[picked]->colorpoints[0];
+		col4[1] = model[picked]->colorpoints[1];
+		col4[2] = model[picked]->colorpoints[2];
+		col4[3] = model[picked]->colorpoints[3];
+		ImGui::Text("Color points button with Picker:");
+		ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
+		ImGui::ColorEdit4("color 4", col4);
+
+		col3[0] = model[picked]->colormesh[0];
+		col3[1] = model[picked]->colormesh[1];
+		col3[2] = model[picked]->colormesh[2];
+		col3[3] = model[picked]->colormesh[3];
+		ImGui::Text("Color wire-frame with Picker:");
+		ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
+		ImGui::ColorEdit4("color 3", col3);
+
+		model[picked]->colormesh = glm::vec4(col3[0], col3[1], col3[2], col3[3]);
+		model[picked]->colorpoints = glm::vec4(col4[0], col4[1], col4[2], col4[3]);
+		model[picked]->colorrelleno = glm::vec4(col2[0], col2[1], col2[2], col2[3]);
+
+		//rotate
+		modelMatrix = model[picked]->modelMatrix;
+		ImGui::Text("Red is X, Green is Y, Blue is Z");
+		ImGui::Checkbox("Rotate", &Iwant_torotate);
+		if (Iwant_torotate)
+		{
+			qRot = model[picked]->Qrotacion;
+			ImGui::gizmo3D("##gizmo1", qRot /*, size,  mode */);
+		}
+		model[picked]->Qrotacion = qRot;
+		modelMatrix = mat4_cast(qRot);
+		//Traslate, scale
+		ImGui::Text("X, Y, Z");
+		vec4fs[0] = model[picked]->vec4fscale[0];
+		vec4fs[1] = model[picked]->vec4fscale[1];
+		vec4fs[2] = model[picked]->vec4fscale[2];
+		ImGui::DragFloat("SCALE X", &vec4fs[0], 0.01f);
+		ImGui::DragFloat("SCALE Y", &vec4fs[1], 0.01f);
+		ImGui::DragFloat("SCALE Z", &vec4fs[2], 0.01f);
+		model[picked]->vec4fscale[0] = vec4fs[0];
+		model[picked]->vec4fscale[1] = vec4fs[1];
+		model[picked]->vec4fscale[2] = vec4fs[2];
+		if (ImGui::DragFloat("SCALE ALL", &vec4fs[0], 0.01f, 0.0f))
+		{
+			vec4fs[1] = vec4fs[0];
+			vec4fs[2] = vec4fs[0];
+		}
+		model[picked]->vec4fscale[0] = vec4fs[0];
+		model[picked]->vec4fscale[1] = vec4fs[1];
+		model[picked]->vec4fscale[2] = vec4fs[2];
+
+		//ImGui::SliderFloat3("SCALE", vec4fs, 0.0f, 3.0f);
+		ImGui::Text("X, Y, Z");
+		vec4ft[0] = model[picked]->vec4ftraslate[0];
+		vec4ft[1] = model[picked]->vec4ftraslate[1];
+		vec4ft[2] = model[picked]->vec4ftraslate[2];
+		ImGui::DragFloat("TRASLATE X", &vec4ft[0], 0.02f);
+		ImGui::DragFloat("TRASLATE Y", &vec4ft[1], 0.02f);
+		ImGui::DragFloat("TRASLATE Z", &vec4ft[2], 0.02f);
+		model[picked]->vec4ftraslate[0] = vec4ft[0];
+		model[picked]->vec4ftraslate[1] = vec4ft[1];
+		model[picked]->vec4ftraslate[2] = vec4ft[2];
+		//ImGui::SliderFloat3("TRASLATE", vec4ft, -2.0f, 2.0f, "ratio = %.01f");
+		glm::vec3 auxs(vec4fs[0], vec4fs[1], vec4fs[2]);
+		glm::vec3 auxt(vec4ft[0], vec4ft[1], vec4ft[2]);
+		modelMatrix = glm::translate(modelMatrix, auxt);
+		modelMatrix = glm::scale(modelMatrix, auxs);
+		model[picked]->setmodelMatrix(modelMatrix);
+
+		ImGui::Checkbox("Mallado", &model[picked]->mallado);
+		ImGui::Checkbox("Puntos", &model[picked]->points);
+		ImGui::Checkbox("Relleno", &model[picked]->relleno);
+		ImGui::Checkbox("Back Face culling", &model[picked]->back_face_culling);
+		ImGui::Checkbox("Ortho", &orthos);
+		ImGui::Checkbox("Z-buffer", &model[picked]->zbuffer);
 	}
 
 	//if (ImGui::Button("recompile"))

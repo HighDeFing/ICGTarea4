@@ -32,7 +32,7 @@ project "EasyDIPAPI"
    language "C++"
    cppdialect "C++17"
 
-   files { "%{prj.name}/**.h", "%{prj.name}/**.cpp", "%{prj.name}/shaders/**.*"}
+   files { "%{prj.name}/**.h", "%{prj.name}/**.cpp", "%{prj.name}/shaders/**.*","%{prj.name}/shaders/**.vert","%{prj.name}/shaders/**.frag","%{prj.name}/shaders/**.geom"}
 
    links {
       "glad",

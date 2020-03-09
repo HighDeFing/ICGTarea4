@@ -12,7 +12,7 @@ out VS_OUT {
 
 void main()
 {
-    gl_Position =  mModelView * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    gl_Position =  projection * mModelView * vec4(aPos.x, aPos.y, aPos.z, 1.0);
 	mat3 normalMatrix = mat3(transpose(inverse(mModelView)));
     vs_out.normal = normalize(vec3(vec4(normalMatrix * aNormal, 0.0)));
 }
