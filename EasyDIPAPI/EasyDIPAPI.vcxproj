@@ -96,6 +96,7 @@
     <ClInclude Include="EasyDIPAPI\Quad.h" />
     <ClInclude Include="EasyDIPAPI\obj_loader.h" />
     <ClInclude Include="EasyDIPAPI\shaders\Shader.h" />
+    <ClInclude Include="EasyDIPAPI\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EasyDIPAPI\EDpch.cpp" />

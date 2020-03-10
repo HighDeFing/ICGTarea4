@@ -1,6 +1,9 @@
+
 #include "Mesh.h"
 #include <iostream>
 #include <filesystem>
+
+#include "stb_image.h"
 namespace fs = std::filesystem;
 
 //static Quad* instance;
@@ -21,6 +24,7 @@ void Mesh::MeshCreate(vector<Vertex> vertices, vector<unsigned int> indices) {
 	this->vertices = vertices;
 	this->indices = indices;
 	setupMesh();
+	loadCreateTexture("notihnyet");
 	
 }
 
@@ -45,15 +49,56 @@ void Mesh::setupMesh()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
 	// vertex normals
-	//glEnableVertexAttribArray(1);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
 	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
 	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
+}
+
+void Mesh::BindTexture()
+{
+	//bwShader->setInt("ourTexture", 0);
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	//glBindVertexArray(VAO);
+}
+
+void Mesh::loadCreateTexture(std::string path)
+{
+	// texture 1
+	// ---------
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load image, create texture and generate mipmaps
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+	// The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+	unsigned char* data = stbi_load("C:/Users/heide/Desktop/ICG/[ICG] Tarea #4 - 24981800/ICGTarea4/texture/container.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	bwShader->setInt("ourTexture", 0);
 }
 
 Mesh::~Mesh() {
@@ -71,7 +116,8 @@ void Mesh::Draw()
 	bwShader->setMat4("mModel", modelMatrix);
 	bwShader->setMat4("mView", view);
 	bwShader->setMat4("mProj", proj);
-	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	if (zbuffer) {
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

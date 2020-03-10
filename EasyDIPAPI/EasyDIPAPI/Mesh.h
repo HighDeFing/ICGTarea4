@@ -8,6 +8,7 @@
 #include "EDpch.h"
 #include <glm/vec3.hpp>
 #include <glm/glm.hpp>
+#include <filesystem> 
 #include <vector>
 #include <cstddef>
 #include "shaders/Shader.h"
@@ -18,6 +19,7 @@ extern Shader *bwShader;
 struct Vertex {
 	glm::vec3 Position;
 	glm::vec3 Normal;
+	glm::vec2 TexCoords;
 };
 
 
@@ -25,10 +27,11 @@ class Mesh {
 	unsigned int VBO, VAO, EBO;
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
+	unsigned int texture;
 
 	~Mesh();
 public:
-	bool mallado;
+	bool mallado = true;
 	bool points;
 	bool back_face_culling;
 	bool zbuffer;
@@ -53,6 +56,8 @@ public:
 	void setmodelMatrix(glm::mat4);
 	void setproj(glm::mat4);
 	void setView(glm::mat4);
+	void loadCreateTexture(std::string path);
+	void BindTexture();
 	//static Mesh* Instance();
 };
 #endif // !__ED_MESH__

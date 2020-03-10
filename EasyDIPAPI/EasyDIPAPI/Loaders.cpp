@@ -57,19 +57,29 @@ namespace CG
 
 	Mesh* LoadObj(const std::string path) 
 	{
+		// model read structures
 		OBJModel *model = new OBJModel(path);
 		std::vector<OBJIndex> indices_model;
 		indices_model.clear();
 		std::vector<glm::vec3> vertices_model;
 		vertices_model.clear();
-		Vertex aux_vertex;
+		std::vector<glm::vec3> normals_model;
+		normals_model.clear();
+		std::vector<glm::vec2> textures_model;
+		textures_model.clear();
 
+		Vertex aux_vertex;
 		std::vector <Vertex> vertices;
 		vertices.clear();
 		vector <unsigned int> indices;
 		indices.clear();
+		//faster mode
+		//model->ToIndexedModel();
+		//model assing to reades
 		indices_model = model->OBJIndices;
 		vertices_model = model->vertices;
+		normals_model = model->normals;
+		textures_model = model->uvs;
 
 		//center
 		glm::vec3 Centro;
@@ -78,26 +88,37 @@ namespace CG
 		float median_point;
 
 		// sizes
-		float vertices_size = vertices_model.size();
 		float indices_size = indices_model.size();
-		//std::cout << "vertices_size: "<< vertices_size << '\n';
-		//std::cout << "indices_size: " << indices_size << '\n';
+		float vertices_size = vertices_model.size();
+		float normals_size = normals_model.size();
+		float textures_size = textures_model.size();
+
+		std::cout << "vertices_size: "<< vertices_size << '\n';
+		std::cout << "normals_size:" << normals_size << '\n';
+		std::cout << "indices_size: " << indices_size << '\n';
 		for (int i = 0; i < vertices_size; i++)
 		{
 			//std::cout << glm::to_string(vertices[i]) << '\n';
 			aux_vertex.Position = vertices_model[i];
 			vertices.insert(vertices.begin() + i, aux_vertex);
-			//vertices_aux[i].Position = glm::vec3(vertices[i].x, vertices[i].y, vertices[i].z);
-			//std::cout << glm::to_string(vertices[i].Position) << '\n';
 		}
 		for (int i = 0; i < indices_size; i++)
 		{
+			if (normals_size < 0)
+			{
+				aux_vertex.Normal = normals_model[indices_model[i].normalIndex];
+			}
+			if (textures_size < 0)
+			{
+				aux_vertex.TexCoords = textures_model[indices_model[i].uvIndex];
+				vertices.insert(vertices.begin() + indices_model[i].vertexIndex, aux_vertex);
+			}
 			//indices_aux[i] = indices[0].vertexIndex;
-			//std::cout << indices[i].vertexIndex << " " << '\n';
 			indices.push_back(indices_model[i].vertexIndex);
-			//std::cout << indices[i].uvIndex << " " << '\n';
+			//std::cout << indices[i] << " " << '\n';
+			//std::cout << indices_model[i].uvIndex << " " << '\n';
 		}
-
+		std::cout << "indices_size_model: " << indices.size() << '\n';
 		maxVertex = glm::vec3(vertices[0].Position.x, vertices[0].Position.y, vertices[0].Position.z);
 		minVertex = glm::vec3(vertices[0].Position.x, vertices[0].Position.y, vertices[0].Position.z);
 		for (int i = 0; i < vertices.size();i++)

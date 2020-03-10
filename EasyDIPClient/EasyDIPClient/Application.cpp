@@ -260,17 +260,20 @@ void Application::MainLoop()
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
 
-		
-		
 		// Get mouse position
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 		ImGui();
 		processInput();
+		glfwSetScrollCallback(window, scroll_callback);
+		glfwSetCursorPosCallback(window, cursor_position_callback);
 		if (move) {
-			glfwSetScrollCallback(window, scroll_callback);
-			glfwSetCursorPosCallback(window, cursor_position_callback);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		else
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 
 		// Rendering
@@ -290,42 +293,43 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 		lastY = ypos;
 		firstMouse = false;
 	}
+	if (move) {
+		float xoffset = xpos - lastX;
+		float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+		lastX = xpos;
+		lastY = ypos;
 
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-	lastX = xpos;
-	lastY = ypos;
+		float sensitivity = 0.1f; // change this value to your liking
+		xoffset *= sensitivity;
+		yoffset *= sensitivity;
 
-	float sensitivity = 0.1f; // change this value to your liking
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
+		yaw1 += xoffset;
+		pitch1 += yoffset;
 
-	yaw1 += xoffset;
-	pitch1 += yoffset;
+		// make sure that when pitch is out of bounds, screen doesn't get flipped
+		if (pitch1 > 89.0f)
+			pitch1 = 89.0f;
+		if (pitch1 < -89.0f)
+			pitch1 = -89.0f;
 
-	// make sure that when pitch is out of bounds, screen doesn't get flipped
-	if (pitch1 > 89.0f)
-		pitch1 = 89.0f;
-	if (pitch1 < -89.0f)
-		pitch1 = -89.0f;
-
-	glm::vec3 front;
-	front.x = cos(glm::radians(yaw1)) * cos(glm::radians(pitch1));
-	front.y = sin(glm::radians(pitch1));
-	front.z = sin(glm::radians(yaw1)) * cos(glm::radians(pitch1));
-	cameraFront = glm::normalize(front);
-	if (!move) return;
+		glm::vec3 front;
+		front.x = cos(glm::radians(yaw1)) * cos(glm::radians(pitch1));
+		front.y = sin(glm::radians(pitch1));
+		front.z = sin(glm::radians(yaw1)) * cos(glm::radians(pitch1));
+		cameraFront = glm::normalize(front);
+	}
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	if (fov >= 1.0f && fov <= 45.0f)
-		fov -= yoffset;
-	if (fov <= 1.0f)
-		fov = 1.0f;
-	if (fov >= 45.0f)
-		fov = 45.0f;
-	if (!move) return;
+	if (move) {
+		if (fov >= 1.0f && fov <= 45.0f)
+			fov -= yoffset;
+		if (fov <= 1.0f)
+			fov = 1.0f;
+		if (fov >= 45.0f)
+			fov = 45.0f;
+	}
 }
 
 void Application::processInput()
@@ -340,13 +344,20 @@ void Application::processInput()
 		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+	{
+		firstMouse = true;
+		move = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		move = false;
 
 
 }
 
 void Application::Render()
 {
-	if (!orthos)
+	if (orthos)
 	{
 		//Orthogonal
 		proj = glm::mat4(1.0f);
@@ -368,10 +379,11 @@ void Application::Render()
 				//glBindTexture(GL_TEXTURE_2D, texId);
 				//bwShader->setInt("tex", 0);
 				//bwShader->setFloat("test", test);
+				model[i]->BindTexture();
 				model[i]->Bind();
-				model[i]->Draw();
 				model[i]->setView(view);
 				model[i]->setproj(proj);
+				model[i]->Draw();
 				//model[i]->colormesh = glm::vec4(col3[0], col3[1], col3[2], col3[3]);
 				//model[i]->colorpoints = glm::vec4(col4[0], col4[1], col4[2], col4[3]);
 				//mesh->DrawNormals();
@@ -448,7 +460,10 @@ void Application::ImGui()
 	if (ImGui::DragFloat("Near Clipping Plane", &NCP, 0.01f));
 	ImGui::PopItemWidth();
 
-	ImGui::Checkbox("Move", &move);
+	if (ImGui::Checkbox("Move", &move))
+	{
+		firstMouse = true;
+	}
 	if (texOGImg)
 	{
 		//ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
@@ -537,7 +552,10 @@ void Application::ImGui()
 		ImGui::Checkbox("Puntos", &model[picked]->points);
 		ImGui::Checkbox("Relleno", &model[picked]->relleno);
 		ImGui::Checkbox("Back Face culling", &model[picked]->back_face_culling);
-		ImGui::Checkbox("Ortho", &orthos);
+		if (ImGui::Checkbox("Ortho", &orthos))
+		{
+			NCP = 0.0f;
+		}
 		ImGui::Checkbox("Z-buffer", &model[picked]->zbuffer);
 	}
 
@@ -585,7 +603,7 @@ void Application::ImGui()
 
 void Application::Init() {
 	//Shader mainShader(vertexPath, fragmentPath, nullptr);
-	bwShader = new Shader(vertexPath, fragmentPath, geometryPath);
+	bwShader = new Shader(vertexPath, fragmentPath, NULL);
 	//*bwShader = mainShader;
 }
 

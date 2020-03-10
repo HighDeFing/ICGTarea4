@@ -15,6 +15,7 @@
     <ClInclude Include="EasyDIPAPI\shaders\Shader.h">
       <Filter>shaders</Filter>
     </ClInclude>
+    <ClInclude Include="EasyDIPAPI\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EasyDIPAPI\EDpch.cpp" />
@@ -28,13 +29,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="EasyDIPAPI\shaders\shader.vert">
+      <Filter>shaders</Filter>
+    </None>
     <None Include="EasyDIPAPI\shaders\shader.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="EasyDIPAPI\shaders\shader.geom">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="EasyDIPAPI\shaders\shader.vert">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

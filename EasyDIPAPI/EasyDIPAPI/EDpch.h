@@ -22,8 +22,8 @@ using RawData = unsigned char;
 
 
 
-unsigned int GetTexture(RawData* data, unsigned int imgWidth, unsigned int imgHeight);
-RawData* EDNegativeHA(RawData* data, unsigned int imgWidth, unsigned int imgHeight, RawData** outData = nullptr, int nChannels = 3);
+//unsigned int GetTexture(RawData* data, unsigned int imgWidth, unsigned int imgHeight);
+//RawData* EDNegativeHA(RawData* data, unsigned int imgWidth, unsigned int imgHeight, RawData** outData = nullptr, int nChannels = 3);
 
 
 bool EDInit();
