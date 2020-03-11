@@ -36,6 +36,7 @@ public:
 	bool back_face_culling;
 	bool zbuffer;
 	bool relleno;
+	bool texture_with_color;
 	glm::vec4 colorrelleno = { 0.4f,0.7f,0.0f,0.5f };
 	glm::vec4 colormesh = { 1.0f,1.0f,1.0f,1.0f };
 	glm::vec4 colorpoints = { 0.0f,0.0f,0.0f,0.0f};
@@ -56,7 +57,7 @@ public:
 	void setmodelMatrix(glm::mat4);
 	void setproj(glm::mat4);
 	void setView(glm::mat4);
-	void loadCreateTexture(std::string path);
+	void loadCreateTexture(const char*);
 	void BindTexture();
 	//static Mesh* Instance();
 };

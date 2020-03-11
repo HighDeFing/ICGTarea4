@@ -11,18 +11,17 @@
 #include <glm/vec3.hpp>
 #include <glm/glm.hpp>
 #include <vector>
+#include "Mesh.h"
 
 using std::vector;
-
-struct Vertex1 {
-	glm::vec3 Position;
-};
+extern struct Vertex;
 
 class Quad {
 	static Quad* instance;
-	static unsigned int VBO, VAO, EBO;
-	vector<Vertex1> vertices1;
-	vector<unsigned int> indices1;
+	unsigned int VBO, VAO, EBO;
+	unsigned int texture;
+	vector<Vertex> vertices;
+	vector<unsigned int> indices;
 	Quad();
 	~Quad();
 public:
@@ -30,6 +29,9 @@ public:
 	void Draw();
 	void Bind();
 	static Quad* Instance();
+	void CreateTexture();
+	void SetMesh();
+	void BindTexture();
 };
 #endif // !__ED_QUAD__
 

@@ -36,6 +36,30 @@ std::string openfilename()
 		return fileNameStr;
 	}
 
+std::string openfilenametexture()
+{
+	OPENFILENAME ofn;
+	wchar_t fileName[MAX_PATH] = L"";
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = NULL;
+	ofn.lpstrFilter = L"All Files\0*.png;*.jpg";
+	ofn.lpstrFile = fileName;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.lpstrDefExt = L"";
+	std::string fileNameStr;
+
+	if (GetOpenFileName(&ofn)) {
+		std::wstring aux(fileName);
+		std::string str(aux.begin(), aux.end());
+		fileNameStr = str;
+	}
+
+	return fileNameStr;
+}
+
+
 //
 //std::wstring openfilename(HWND owner = NULL) {
 //	OPENFILENAME ofn;       // common dialog box structure
@@ -397,11 +421,11 @@ void Application::Render()
 	//Quad *quad = Quad::Instance();
 	//if (bwShader) {
 	//	bwShader->use();
-	//	//glActiveTexture(0);
 	//	//glBindTexture(GL_TEXTURE_2D, texId);
 	//	//wShader->setInt("tex", 0);
 	//	//bwShader->setFloat("test", test);
-	//	quad->Bind();
+	//	//quad->Bind();
+	//	quad->BindTexture();
 	//	quad->Draw();
 	//}
 }
@@ -421,7 +445,7 @@ void Application::ImGui()
 	//ImGui::SliderFloat("test", &test, 0, 1);
 
 	ImGui::Begin("Convolution Editor");
-	if (ImGui::Button("Load"))
+	if (ImGui::Button("Load Model"))
 	{
 		string a = openfilename();
 		Mesh* mesh = new Mesh();
@@ -429,6 +453,14 @@ void Application::ImGui()
 		model.push_back(mesh);
 		picked = model.size() - 1;
 		Iwant_torotate = false;
+	}
+
+	if (!model.empty() && picked < model.size() && picked >= 0)
+	if (ImGui::Button("Load texture"))
+	{
+		std::string b = openfilenametexture();
+		const char* c = b.c_str();
+		model[picked]->loadCreateTexture(c);
 	}
 
 	ImGui::Text("Backgound color button with Picker:");
@@ -468,7 +500,7 @@ void Application::ImGui()
 	{
 		//ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
 	}
-	if (!model.empty() && picked<model.size())
+	if (!model.empty() && picked<model.size() && picked >= 0)
 	{
 		//colors
 		col2[0] = model[picked]->colorrelleno[0];
@@ -548,6 +580,7 @@ void Application::ImGui()
 		modelMatrix = glm::scale(modelMatrix, auxs);
 		model[picked]->setmodelMatrix(modelMatrix);
 
+		ImGui::Checkbox("Textura con color", &model[picked]->texture_with_color);
 		ImGui::Checkbox("Mallado", &model[picked]->mallado);
 		ImGui::Checkbox("Puntos", &model[picked]->points);
 		ImGui::Checkbox("Relleno", &model[picked]->relleno);

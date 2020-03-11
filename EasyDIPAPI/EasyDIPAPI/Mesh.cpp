@@ -24,43 +24,65 @@ void Mesh::MeshCreate(vector<Vertex> vertices, vector<unsigned int> indices) {
 	this->vertices = vertices;
 	this->indices = indices;
 	setupMesh();
-	loadCreateTexture("notihnyet");
+	//loadCreateTexture("notihnyet");
 	
 }
 
 void Mesh::setupMesh()
 {
+	//for (int i = 0; i < vertices.size(); i++)
+	//{
+	//	std::cout << i << '\n';
+	//	std::cout << "Position:" << glm::to_string(vertices[i].Position) << '\n';
+	//	//std::cout << "Normals:" << glm::to_string(vertices[i].Normal) << '\n';
+	//	std::cout << "Textures:" << glm::to_string(vertices[i].TexCoords) << '\n';
+	//}
+	//vertices.clear();
+	//std::cout << "Con los de mesh" << '\n' << '\n';
+	//Vertex aux; aux.Position = { 0.5f,  0.5f, 0.0f };
+	//vertices.insert(vertices.begin() + 0, aux);
+	//vertices.insert(vertices.begin() + 1, aux);
+	//vertices.insert(vertices.begin() + 2, aux);
+	//vertices.insert(vertices.begin() + 3, aux);
+	//vertices[0].Position = { 1.0f,  1.0f, 0.0f }; vertices[0].Normal = { 1.0f, 0.0f, 0.0f }; vertices[0].TexCoords = { 1.0f, 1.0f };
+	//vertices[1].Position = { 1.0f, -1.0f, 0.0f }; vertices[1].Normal = { 0.0f, 1.0f, 0.0f }; vertices[1].TexCoords = { 1.0f, 0.0f };
+	//vertices[2].Position = { -1.0f, -1.0f, 0.0f }; vertices[2].Normal = { 0.0f, 0.0f, 1.0f }; vertices[2].TexCoords = { 0.0f, 0.0f };
+	//vertices[3].Position = { -1.0f,  1.0f, 0.0f }; vertices[3].Normal = { 1.0f, 1.0f, 0.0f }; vertices[3].TexCoords = { 0.0f, 1.0f };
+	//for (int i = 0; i < vertices.size(); i++)
+	//{
+	//	std::cout << i << '\n';
+	//	std::cout << "Position:" << glm::to_string(vertices[i].Position) << '\n';
+	//	//std::cout << "Normals:" << glm::to_string(vertices[i].Normal) << '\n';
+	//	std::cout << "Textures:" << glm::to_string(vertices[i].TexCoords) << '\n';
+	//}
+
+	//for (int i = 0; i < indices.size(); i++)
+	//{
+	//	std::cout<<indices[i];
+	//}
+
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
-	// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
-	// vertex positions
-	glEnableVertexAttribArray(0);
+	// position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-
-	// vertex normals
-	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(0);
+	// color attribute
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
-
-	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(1);
+	// texture coord attribute
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+	glEnableVertexAttribArray(2);
 
-	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-	//glBindVertexArray(0);
 }
 
 void Mesh::BindTexture()
@@ -68,11 +90,11 @@ void Mesh::BindTexture()
 	//bwShader->setInt("ourTexture", 0);
 	glActiveTexture(0);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	//glBindVertexArray(VAO);
 }
 
-void Mesh::loadCreateTexture(std::string path)
+void Mesh::loadCreateTexture(const char* path)
 {
+
 	// texture 1
 	// ---------
 	glGenTextures(1, &texture);
@@ -87,7 +109,7 @@ void Mesh::loadCreateTexture(std::string path)
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
 	// The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-	unsigned char* data = stbi_load("C:/Users/heide/Desktop/ICG/[ICG] Tarea #4 - 24981800/ICGTarea4/texture/container.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -104,6 +126,7 @@ void Mesh::loadCreateTexture(std::string path)
 Mesh::~Mesh() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 }
 
 void Mesh::Bind()
@@ -116,8 +139,7 @@ void Mesh::Draw()
 	bwShader->setMat4("mModel", modelMatrix);
 	bwShader->setMat4("mView", view);
 	bwShader->setMat4("mProj", proj);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	bwShader->setBool("texture_with_color", texture_with_color);
 	if (zbuffer) {
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -158,8 +180,8 @@ void Mesh::Draw()
 		bwShader->setVec4("my_color", colorpoints);
 		glDrawElements(GL_POINTS, indices.size(), GL_UNSIGNED_INT, 0);
 	}
-	glBindVertexArray(VAO);
-	glBindVertexArray(0);
+	//glBindVertexArray(VAO);
+	//glBindVertexArray(0);
 }
 
 void Mesh::DrawNormals()

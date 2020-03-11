@@ -74,7 +74,7 @@ namespace CG
 		vector <unsigned int> indices;
 		indices.clear();
 		//faster mode
-		//model->ToIndexedModel();
+		model->ToIndexedModel();
 		//model assing to reades
 		indices_model = model->OBJIndices;
 		vertices_model = model->vertices;
@@ -93,32 +93,20 @@ namespace CG
 		float normals_size = normals_model.size();
 		float textures_size = textures_model.size();
 
-		std::cout << "vertices_size: "<< vertices_size << '\n';
+		/*std::cout << "vertices_size: "<< vertices_size << '\n';
 		std::cout << "normals_size:" << normals_size << '\n';
 		std::cout << "indices_size: " << indices_size << '\n';
+		std::cout << "textures_model: " << textures_model.size() << '\n';*/
 		for (int i = 0; i < vertices_size; i++)
 		{
 			//std::cout << glm::to_string(vertices[i]) << '\n';
+			//aux_vertex.Position = vertices_model[indices_model[i].vertexIndex];
+			//vertices.push_back(aux_vertex);
 			aux_vertex.Position = vertices_model[i];
 			vertices.insert(vertices.begin() + i, aux_vertex);
+			//std::cout << "Position:" << glm::to_string(vertices[i].Position) << '\n';
 		}
-		for (int i = 0; i < indices_size; i++)
-		{
-			if (normals_size < 0)
-			{
-				aux_vertex.Normal = normals_model[indices_model[i].normalIndex];
-			}
-			if (textures_size < 0)
-			{
-				aux_vertex.TexCoords = textures_model[indices_model[i].uvIndex];
-				vertices.insert(vertices.begin() + indices_model[i].vertexIndex, aux_vertex);
-			}
-			//indices_aux[i] = indices[0].vertexIndex;
-			indices.push_back(indices_model[i].vertexIndex);
-			//std::cout << indices[i] << " " << '\n';
-			//std::cout << indices_model[i].uvIndex << " " << '\n';
-		}
-		std::cout << "indices_size_model: " << indices.size() << '\n';
+		//std::cout << glm::to_string(vertices_model[indices_model[0].vertexIndex]) << '\n';
 		maxVertex = glm::vec3(vertices[0].Position.x, vertices[0].Position.y, vertices[0].Position.z);
 		minVertex = glm::vec3(vertices[0].Position.x, vertices[0].Position.y, vertices[0].Position.z);
 		for (int i = 0; i < vertices.size();i++)
@@ -143,7 +131,42 @@ namespace CG
 			vertices[k] = aux_vertex;
 			//std::cout << "vertices" << glm::to_string(vertices[k].Position) << std::endl;
 		}
+		for (int i = 0; i < indices_size; i++)
+		{
 
+			if (normals_size > 0)
+			{
+				/*std::cout << "indices_model[i].normalIndex: " << indices_model[i].normalIndex << '\n';
+				std::cout << "normals_model[indices_model[i].normalIndex] " << glm::to_string(normals_model[indices_model[i].normalIndex]) << '\n';
+				std::cout << "indices_model[i].vertexIndex" << indices_model[i].vertexIndex << '\n';*/
+				//normals by face
+				aux_vertex.Normal = normals_model[indices_model[i].normalIndex];
+				vertices[indices_model[i].vertexIndex].Normal = normalize(aux_vertex.Normal);
+				//vertices.insert(vertices.begin() + indices_model[i].vertexIndex, aux_vertex);
+			}
+			if (textures_size > 0)
+			{
+				//std::cout << indices_model[i].vertexIndex + 1 << "/";
+				//std::cout << indices_model[i].uvIndex + 1 << "/normal" << '\n';
+				aux_vertex.TexCoords = textures_model[indices_model[i].uvIndex];
+				vertices[indices_model[i].vertexIndex].TexCoords = aux_vertex.TexCoords;
+				//std::cout << "Textures:" << glm::to_string(vertices[indices_model[i].vertexIndex].TexCoords) << '\n';
+				//vertices.insert(vertices.begin() + indices_model[i].vertexIndex, aux_vertex);
+			}
+			//indices_aux[i] = indices[0].vertexIndex;
+			indices.push_back(indices_model[i].vertexIndex);
+			//std::cout << indices[i] << '\n';
+			//std::cout << indices[i] << " " << '\n';
+			//std::cout << indices_model[i].uvIndex << " " << '\n';
+		}
+		//std::cout << "indices_size_model: " << indices.size() << '\n';
+		//for (int i = 0; i < vertices_size; i++)
+		//{
+		//	std::cout << i << '\n';
+		//	std::cout << "Position:" << glm::to_string(vertices[i].Position) << '\n';
+		//	//std::cout << "Normals:" << glm::to_string(vertices[i].Normal) << '\n';
+		//	std::cout << "Textures:" << glm::to_string(vertices[i].TexCoords) << '\n';
+		//}
 
 		Mesh *mesh = new Mesh();
 		mesh->MeshCreate(vertices, indices);
