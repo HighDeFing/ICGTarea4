@@ -90,6 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="EasyDIPAPI\EDpch.h" />
+    <ClInclude Include="EasyDIPAPI\Light.h" />
     <ClInclude Include="EasyDIPAPI\Loaders.h" />
     <ClInclude Include="EasyDIPAPI\Mesh.h" />
     <ClInclude Include="EasyDIPAPI\Model.h" />
@@ -100,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EasyDIPAPI\EDpch.cpp" />
+    <ClCompile Include="EasyDIPAPI\Light.cpp" />
     <ClCompile Include="EasyDIPAPI\Loaders.cpp" />
     <ClCompile Include="EasyDIPAPI\Mesh.cpp" />
     <ClCompile Include="EasyDIPAPI\Model.cpp" />
@@ -117,8 +119,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="EasyDIPAPI\shaders\shader.frag" />
-    <None Include="EasyDIPAPI\shaders\shader.geom" />
     <None Include="EasyDIPAPI\shaders\shader.vert" />
+    <None Include="EasyDIPAPI\shaders\shader_light.frag" />
+    <None Include="EasyDIPAPI\shaders\shader_light.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

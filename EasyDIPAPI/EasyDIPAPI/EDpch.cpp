@@ -6,7 +6,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-Shader *bwShader = nullptr;
+Shader *bwShader = nullptr;  
 
 //unsigned int GetTexture(RawData* data, unsigned int imgWidth, unsigned int imgHeight)
 //{

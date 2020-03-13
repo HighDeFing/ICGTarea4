@@ -100,14 +100,23 @@ std::string openfilenametexture()
 //"./../EasyDIPAPI/EasyDIPAPI/shaders/shader.geom"
 
 extern Shader *bwShader;
+Shader *lampShader;
 
 const char* vertexPath = "./../EasyDIPAPI/EasyDIPAPI/shaders/shader.vert";
 const char* fragmentPath = "./../EasyDIPAPI/EasyDIPAPI/shaders/shader.frag";
 const char* geometryPath = "./../EasyDIPAPI/EasyDIPAPI/shaders/shader.geom";
 
+const char* vertex_LightPath = "./../EasyDIPAPI/EasyDIPAPI/shaders/shader_light.vert";
+const char* fragment_LightPath = "./../EasyDIPAPI/EasyDIPAPI/shaders/shader_light.frag";
+
 quat qRot = quat(1.f, 0.f, 0.f, 0.f);
 mat4 modelMatrix;
+mat4 light_modelMatrix = glm::mat4(1.0f);
 mat4 viewMatrix;
+
+//light1 bool
+bool only_one_light1 =  false;
+
 static float col2[4] = { 0.4f,0.7f,0.0f,0.5f };
 static float col1[4] = { 0.2f,0.3f,0.3f,1.0f};
 static float col4[4] = { 0.0f,0.0f,0.0f,0.0f };
@@ -116,13 +125,18 @@ static float col3[4] = { 1.0f,1.0f,1.0f,1.0f };
 static float vec4fs[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
 static float vec4ft[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
+static float light_vec4fs[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
+static float light_vec4ft[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
 bool Iwant_torotate = 0;
 bool orthos;
 glm::mat4 proj;
 glm::mat4 orthogonal;
 static int picked = -1;
+static int light_picked = -1;
 
 std::vector <Mesh *> model;
+Light *lights;
 
 //CAMARA
 glm::mat4 view;
@@ -280,9 +294,9 @@ void Application::MainLoop()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
+		//Demo
+		/*if (show_demo_window)
+			ImGui::ShowDemoWindow(&show_demo_window);*/
 
 		// Get mouse position
 		float currentFrame = glfwGetTime();
@@ -394,6 +408,7 @@ void Application::Render()
 		proj = glm::perspective(glm::radians(fov), (float)windowWidth / (float)windowHeight, NCP, 1000.0f);
 	}
 	view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
 	if (model.size() > 0) {
 		for (int i = 0; i < model.size(); i++)
 		{
@@ -418,6 +433,18 @@ void Application::Render()
 			}
 		}
 	}
+	if (only_one_light1) {
+		if (lampShader) {
+			bwShader->use();
+			lights->Connect_shader();
+			lampShader->use();
+			lights->Bind();
+			lights->setView(view);
+			lights->setproj(proj);
+			lights->Draw();
+		}
+	}
+	
 	//Quad *quad = Quad::Instance();
 	//if (bwShader) {
 	//	bwShader->use();
@@ -455,19 +482,139 @@ void Application::ImGui()
 		Iwant_torotate = false;
 	}
 
-	if (!model.empty() && picked < model.size() && picked >= 0)
-	if (ImGui::Button("Load texture"))
-	{
-		std::string b = openfilenametexture();
-		const char* c = b.c_str();
-		model[picked]->loadCreateTexture(c);
-	}
-
 	ImGui::Text("Backgound color button with Picker:");
 	ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
 	ImGui::ColorEdit4("color 1", col1);
 
 	ImGui::InputInt("Figured Picked", &picked);
+
+	ImGui::PushItemWidth(100);
+	if (ImGui::DragFloat("Near Clipping Plane", &NCP, 0.01f));
+	ImGui::PopItemWidth();
+
+	if (ImGui::Checkbox("Moverse con mouse", &move))
+	{
+		firstMouse = true;
+	}
+	ImGui::SameLine(); HelpMarker("Press Esc to leave camara mode\n");
+	if (ImGui::CollapsingHeader("Opciones de textura:"))
+	{
+		if (!model.empty() && picked < model.size() && picked >= 0)
+			if (ImGui::Button("Load texture"))
+			{
+				std::string b = openfilenametexture();
+				const char* c = b.c_str();
+				model[picked]->loadCreateTexture(c);
+				model[picked]->only_color = false;
+				model[picked]->only_texture = true;
+			}
+		if (!model.empty() && picked < model.size() && picked >= 0)
+		{
+			ImGui::Checkbox("Habilitar Textura", &model[picked]->texture_drawing);
+			if (model[picked]->texture_drawing) 
+			{
+				static int item_current_2 = 0;
+				ImGui::Text("Variaciones de Textura:");
+				ImGui::Combo("", &item_current_2, "Textura con color\0Solo color\0Solo textura\0\0");
+				if (item_current_2 == 0) 
+				{
+					model[picked]->texture_with_color = true;
+					model[picked]->only_color = false;
+					model[picked]->only_texture = false;
+				}
+				if (item_current_2 == 1)
+				{
+					model[picked]->only_color = true;
+					model[picked]->texture_with_color = false;
+					model[picked]->only_texture = false;
+				}
+				if (item_current_2 == 2)
+				{
+					model[picked]->only_texture = true;
+					model[picked]->texture_with_color = false;
+					model[picked]->only_color = false;
+				}
+			}
+			/*ImGui::Checkbox("Textura con color", &model[picked]->texture_with_color);
+			if (model[picked]->texture_with_color)
+			{
+				model[picked]->only_color = false;
+				model[picked]->only_texture = false;
+			}
+			ImGui::Checkbox("Solo color", &model[picked]->only_color);
+			if (model[picked]->only_color)
+			{
+				model[picked]->texture_with_color = false;
+				model[picked]->only_texture = false;
+			}
+			ImGui::Checkbox("Solo textura", &model[picked]->only_texture);
+			if (model[picked]->only_texture)
+			{
+				model[picked]->texture_with_color = false;
+				model[picked]->only_color = false;
+			}*/
+		}
+	}
+	//LUZ
+	if (ImGui::CollapsingHeader("Light 1"))
+	{
+		if (!only_one_light1) {
+			if (ImGui::Button("Create Light"))
+			{
+					Light* light = new Light();
+					light->setupMesh();
+					lights = light;
+					only_one_light1 = true;
+
+			}
+		}
+		if (only_one_light1)
+		{
+			//Ambient or diffuse
+			ImGui::Checkbox("Ambiental", &lights->bambient);
+			ImGui::Checkbox("Difusa", &lights->bdiffuse);
+
+			//Traslate, scale
+			ImGui::Text("X, Y, Z");
+			light_vec4fs[0] = lights->vec4fscale[0];
+			light_vec4fs[1] = lights->vec4fscale[1];
+			light_vec4fs[2] = lights->vec4fscale[2];
+			ImGui::DragFloat("SCALE X-Light", &light_vec4fs[0], 0.01f);
+			ImGui::DragFloat("SCALE Y-Light", &light_vec4fs[1], 0.01f);
+			ImGui::DragFloat("SCALE Z-Light", &light_vec4fs[2], 0.01f);
+			lights->vec4fscale[0] = light_vec4fs[0];
+			lights->vec4fscale[1] = light_vec4fs[1];
+			lights->vec4fscale[2] = light_vec4fs[2];
+			if (ImGui::DragFloat("SCALE ALL-Light", &light_vec4fs[0], 0.01f, 0.0f))
+			{
+				light_vec4fs[1] = light_vec4fs[0];
+				light_vec4fs[2] = light_vec4fs[0];
+			}
+			lights->vec4fscale[0] = light_vec4fs[0];
+			lights->vec4fscale[1] = light_vec4fs[1];
+			lights->vec4fscale[2] = light_vec4fs[2];
+
+			//ImGui::SliderFloat3("SCALE", vec4fs, 0.0f, 3.0f);
+			ImGui::Text("X, Y, Z");
+			light_vec4ft[0] = lights->vec4ftraslate[0];
+			light_vec4ft[1] = lights->vec4ftraslate[1];
+			light_vec4ft[2] = lights->vec4ftraslate[2];
+			ImGui::DragFloat("TRASLATE X-Light", &light_vec4ft[0], 0.02f);
+			ImGui::DragFloat("TRASLATE Y-Light", &light_vec4ft[1], 0.02f);
+			ImGui::DragFloat("TRASLATE Z-Light", &light_vec4ft[2], 0.02f);
+			lights->vec4ftraslate[0] = light_vec4ft[0];
+			lights->vec4ftraslate[1] = light_vec4ft[1];
+			lights->vec4ftraslate[2] = light_vec4ft[2];
+			//ImGui::SliderFloat3("TRASLATE", vec4ft, -2.0f, 2.0f, "ratio = %.01f");
+			glm::vec3 auxs_light(light_vec4fs[0], light_vec4fs[1], light_vec4fs[2]);
+			glm::vec3 auxt_light(light_vec4ft[0], light_vec4ft[1], light_vec4ft[2]);
+			light_modelMatrix = glm::mat4(1.0f);
+			light_modelMatrix = glm::translate(light_modelMatrix, auxt_light);
+			light_modelMatrix = glm::scale(light_modelMatrix, auxs_light);
+			lights->setmodelMatrix(light_modelMatrix);
+		}
+	}
+
 	//ImGui::Text("Color button with Picker:");
 	//ImGui::SameLine(); HelpMarker("With the ImGuiColorEditFlags_NoInputs flag you can hide all the slider/text inputs.\nWith the ImGuiColorEditFlags_NoLabel flag you can pass a non-empty label which will only be used for the tooltip and picker popup.");
 
@@ -487,109 +634,98 @@ void Application::ImGui()
 	//	ImGui::NewLine();
 	//}
 
-
-	ImGui::PushItemWidth(100);
-	if (ImGui::DragFloat("Near Clipping Plane", &NCP, 0.01f));
-	ImGui::PopItemWidth();
-
-	if (ImGui::Checkbox("Move", &move))
+	if (ImGui::CollapsingHeader("Objeto"))
 	{
-		firstMouse = true;
-	}
-	if (texOGImg)
-	{
-		//ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
-	}
-	if (!model.empty() && picked<model.size() && picked >= 0)
-	{
-		//colors
-		col2[0] = model[picked]->colorrelleno[0];
-		col2[1] = model[picked]->colorrelleno[1];
-		col2[2] = model[picked]->colorrelleno[2];
-		col2[3] = model[picked]->colorrelleno[3];
-		ImGui::Text("Color fill button with Picker:");
-		ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
-		ImGui::ColorEdit4("color 2", col2);
-
-		col4[0] = model[picked]->colorpoints[0];
-		col4[1] = model[picked]->colorpoints[1];
-		col4[2] = model[picked]->colorpoints[2];
-		col4[3] = model[picked]->colorpoints[3];
-		ImGui::Text("Color points button with Picker:");
-		ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
-		ImGui::ColorEdit4("color 4", col4);
-
-		col3[0] = model[picked]->colormesh[0];
-		col3[1] = model[picked]->colormesh[1];
-		col3[2] = model[picked]->colormesh[2];
-		col3[3] = model[picked]->colormesh[3];
-		ImGui::Text("Color wire-frame with Picker:");
-		ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
-		ImGui::ColorEdit4("color 3", col3);
-
-		model[picked]->colormesh = glm::vec4(col3[0], col3[1], col3[2], col3[3]);
-		model[picked]->colorpoints = glm::vec4(col4[0], col4[1], col4[2], col4[3]);
-		model[picked]->colorrelleno = glm::vec4(col2[0], col2[1], col2[2], col2[3]);
-
-		//rotate
-		modelMatrix = model[picked]->modelMatrix;
-		ImGui::Text("Red is X, Green is Y, Blue is Z");
-		ImGui::Checkbox("Rotate", &Iwant_torotate);
-		if (Iwant_torotate)
+		if (!model.empty() && picked < model.size() && picked >= 0)
 		{
-			qRot = model[picked]->Qrotacion;
-			ImGui::gizmo3D("##gizmo1", qRot /*, size,  mode */);
-		}
-		model[picked]->Qrotacion = qRot;
-		modelMatrix = mat4_cast(qRot);
-		//Traslate, scale
-		ImGui::Text("X, Y, Z");
-		vec4fs[0] = model[picked]->vec4fscale[0];
-		vec4fs[1] = model[picked]->vec4fscale[1];
-		vec4fs[2] = model[picked]->vec4fscale[2];
-		ImGui::DragFloat("SCALE X", &vec4fs[0], 0.01f);
-		ImGui::DragFloat("SCALE Y", &vec4fs[1], 0.01f);
-		ImGui::DragFloat("SCALE Z", &vec4fs[2], 0.01f);
-		model[picked]->vec4fscale[0] = vec4fs[0];
-		model[picked]->vec4fscale[1] = vec4fs[1];
-		model[picked]->vec4fscale[2] = vec4fs[2];
-		if (ImGui::DragFloat("SCALE ALL", &vec4fs[0], 0.01f, 0.0f))
-		{
-			vec4fs[1] = vec4fs[0];
-			vec4fs[2] = vec4fs[0];
-		}
-		model[picked]->vec4fscale[0] = vec4fs[0];
-		model[picked]->vec4fscale[1] = vec4fs[1];
-		model[picked]->vec4fscale[2] = vec4fs[2];
+			//colors
+			col2[0] = model[picked]->colorrelleno[0];
+			col2[1] = model[picked]->colorrelleno[1];
+			col2[2] = model[picked]->colorrelleno[2];
+			col2[3] = model[picked]->colorrelleno[3];
+			ImGui::Text("Color fill button with Picker:");
+			ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
+			ImGui::ColorEdit4("color 2", col2);
 
-		//ImGui::SliderFloat3("SCALE", vec4fs, 0.0f, 3.0f);
-		ImGui::Text("X, Y, Z");
-		vec4ft[0] = model[picked]->vec4ftraslate[0];
-		vec4ft[1] = model[picked]->vec4ftraslate[1];
-		vec4ft[2] = model[picked]->vec4ftraslate[2];
-		ImGui::DragFloat("TRASLATE X", &vec4ft[0], 0.02f);
-		ImGui::DragFloat("TRASLATE Y", &vec4ft[1], 0.02f);
-		ImGui::DragFloat("TRASLATE Z", &vec4ft[2], 0.02f);
-		model[picked]->vec4ftraslate[0] = vec4ft[0];
-		model[picked]->vec4ftraslate[1] = vec4ft[1];
-		model[picked]->vec4ftraslate[2] = vec4ft[2];
-		//ImGui::SliderFloat3("TRASLATE", vec4ft, -2.0f, 2.0f, "ratio = %.01f");
-		glm::vec3 auxs(vec4fs[0], vec4fs[1], vec4fs[2]);
-		glm::vec3 auxt(vec4ft[0], vec4ft[1], vec4ft[2]);
-		modelMatrix = glm::translate(modelMatrix, auxt);
-		modelMatrix = glm::scale(modelMatrix, auxs);
-		model[picked]->setmodelMatrix(modelMatrix);
+			col4[0] = model[picked]->colorpoints[0];
+			col4[1] = model[picked]->colorpoints[1];
+			col4[2] = model[picked]->colorpoints[2];
+			col4[3] = model[picked]->colorpoints[3];
+			ImGui::Text("Color points button with Picker:");
+			ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
+			ImGui::ColorEdit4("color 4", col4);
 
-		ImGui::Checkbox("Textura con color", &model[picked]->texture_with_color);
-		ImGui::Checkbox("Mallado", &model[picked]->mallado);
-		ImGui::Checkbox("Puntos", &model[picked]->points);
-		ImGui::Checkbox("Relleno", &model[picked]->relleno);
-		ImGui::Checkbox("Back Face culling", &model[picked]->back_face_culling);
-		if (ImGui::Checkbox("Ortho", &orthos))
-		{
-			NCP = 0.0f;
+			col3[0] = model[picked]->colormesh[0];
+			col3[1] = model[picked]->colormesh[1];
+			col3[2] = model[picked]->colormesh[2];
+			col3[3] = model[picked]->colormesh[3];
+			ImGui::Text("Color wire-frame with Picker:");
+			ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
+			ImGui::ColorEdit4("color 3", col3);
+
+			model[picked]->colormesh = glm::vec4(col3[0], col3[1], col3[2], col3[3]);
+			model[picked]->colorpoints = glm::vec4(col4[0], col4[1], col4[2], col4[3]);
+			model[picked]->colorrelleno = glm::vec4(col2[0], col2[1], col2[2], col2[3]);
+
+			//rotate
+			modelMatrix = model[picked]->modelMatrix;
+			ImGui::Text("Red is X, Green is Y, Blue is Z");
+			ImGui::Checkbox("Rotate", &Iwant_torotate);
+			if (Iwant_torotate)
+			{
+				qRot = model[picked]->Qrotacion;
+				ImGui::gizmo3D("##gizmo1", qRot /*, size,  mode */);
+			}
+			model[picked]->Qrotacion = qRot;
+			//Traslate, scale
+			ImGui::Text("X, Y, Z");
+			vec4fs[0] = model[picked]->vec4fscale[0];
+			vec4fs[1] = model[picked]->vec4fscale[1];
+			vec4fs[2] = model[picked]->vec4fscale[2];
+			ImGui::DragFloat("SCALE X", &vec4fs[0], 0.01f);
+			ImGui::DragFloat("SCALE Y", &vec4fs[1], 0.01f);
+			ImGui::DragFloat("SCALE Z", &vec4fs[2], 0.01f);
+			model[picked]->vec4fscale[0] = vec4fs[0];
+			model[picked]->vec4fscale[1] = vec4fs[1];
+			model[picked]->vec4fscale[2] = vec4fs[2];
+			if (ImGui::DragFloat("SCALE ALL", &vec4fs[0], 0.01f, 0.0f))
+			{
+				vec4fs[1] = vec4fs[0];
+				vec4fs[2] = vec4fs[0];
+			}
+			model[picked]->vec4fscale[0] = vec4fs[0];
+			model[picked]->vec4fscale[1] = vec4fs[1];
+			model[picked]->vec4fscale[2] = vec4fs[2];
+
+			//ImGui::SliderFloat3("SCALE", vec4fs, 0.0f, 3.0f);
+			ImGui::Text("X, Y, Z");
+			vec4ft[0] = model[picked]->vec4ftraslate[0];
+			vec4ft[1] = model[picked]->vec4ftraslate[1];
+			vec4ft[2] = model[picked]->vec4ftraslate[2];
+			ImGui::DragFloat("TRASLATE X", &vec4ft[0], 0.02f);
+			ImGui::DragFloat("TRASLATE Y", &vec4ft[1], 0.02f);
+			ImGui::DragFloat("TRASLATE Z", &vec4ft[2], 0.02f);
+			model[picked]->vec4ftraslate[0] = vec4ft[0];
+			model[picked]->vec4ftraslate[1] = vec4ft[1];
+			model[picked]->vec4ftraslate[2] = vec4ft[2];
+			//ImGui::SliderFloat3("TRASLATE", vec4ft, -2.0f, 2.0f, "ratio = %.01f");
+			glm::vec3 auxs(vec4fs[0], vec4fs[1], vec4fs[2]);
+			glm::vec3 auxt(vec4ft[0], vec4ft[1], vec4ft[2]);
+			modelMatrix = mat4_cast(model[picked]->Qrotacion);
+			modelMatrix = glm::translate(modelMatrix, auxt);
+			modelMatrix = glm::scale(modelMatrix, auxs);
+			model[picked]->setmodelMatrix(modelMatrix);
+
+			ImGui::Checkbox("Mallado", &model[picked]->mallado);
+			ImGui::Checkbox("Puntos", &model[picked]->points);
+			ImGui::Checkbox("Relleno", &model[picked]->relleno);
+			ImGui::Checkbox("Back Face culling", &model[picked]->back_face_culling);
+			if (ImGui::Checkbox("Ortho", &orthos))
+			{
+				NCP = 0.0f;
+			}
+			ImGui::Checkbox("Z-buffer", &model[picked]->zbuffer);
 		}
-		ImGui::Checkbox("Z-buffer", &model[picked]->zbuffer);
 	}
 
 	//if (ImGui::Button("recompile"))
@@ -637,6 +773,7 @@ void Application::ImGui()
 void Application::Init() {
 	//Shader mainShader(vertexPath, fragmentPath, nullptr);
 	bwShader = new Shader(vertexPath, fragmentPath, NULL);
+	lampShader = new Shader(vertex_LightPath, fragment_LightPath, NULL);
 	//*bwShader = mainShader;
 }
 

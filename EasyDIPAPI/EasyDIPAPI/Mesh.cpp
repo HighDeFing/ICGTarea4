@@ -134,14 +134,22 @@ void Mesh::Bind()
 	glBindVertexArray(VAO);
 }
 
+
 void Mesh::Draw()
-{
+{   //model shader
 	bwShader->setMat4("mModel", modelMatrix);
 	bwShader->setMat4("mView", view);
 	bwShader->setMat4("mProj", proj);
+	bwShader->setMat3("mTransposeModel", transpose(inverse(modelMatrix)));
+	//texture shaders
+	bwShader->setBool("texture_drawing", texture_drawing);
 	bwShader->setBool("texture_with_color", texture_with_color);
+	bwShader->setBool("only_color", only_color);
+	bwShader->setBool("only_texture", only_texture);
+	//light shader
 	if (zbuffer) {
 		glEnable(GL_DEPTH_TEST);
+		//glDepthMask(GL_FALSE);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	else{
@@ -161,6 +169,7 @@ void Mesh::Draw()
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		bwShader->setVec4("my_color", colorrelleno);
+		bwShader->setVec3("objectColor", glm::vec3(colorrelleno[0], colorrelleno[1], colorrelleno[2]));
 		glPolygonOffset(8.0f, 8.0f);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		glDisable(GL_POLYGON_OFFSET_FILL);
@@ -170,6 +179,7 @@ void Mesh::Draw()
 		glEnable(GL_POLYGON_OFFSET_LINE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		bwShader->setVec4("my_color", colormesh);
+		bwShader->setVec3("objectColor", glm::vec3(colormesh[0], colormesh[1], colormesh[2]));
 		glPolygonOffset(4.0f, 4.0f);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		glDisable(GL_POLYGON_OFFSET_LINE);
@@ -178,6 +188,7 @@ void Mesh::Draw()
 	{
 		glPointSize(1.5f);
 		bwShader->setVec4("my_color", colorpoints);
+		bwShader->setVec3("objectColor", glm::vec3(colorpoints[0], colorpoints[1], colorpoints[2]));
 		glDrawElements(GL_POINTS, indices.size(), GL_UNSIGNED_INT, 0);
 	}
 	//glBindVertexArray(VAO);

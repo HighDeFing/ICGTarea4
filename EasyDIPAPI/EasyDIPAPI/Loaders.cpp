@@ -74,7 +74,7 @@ namespace CG
 		vector <unsigned int> indices;
 		indices.clear();
 		//faster mode
-		model->ToIndexedModel();
+		//model->ToIndexedModel();
 		//model assing to reades
 		indices_model = model->OBJIndices;
 		vertices_model = model->vertices;
@@ -140,16 +140,22 @@ namespace CG
 				std::cout << "normals_model[indices_model[i].normalIndex] " << glm::to_string(normals_model[indices_model[i].normalIndex]) << '\n';
 				std::cout << "indices_model[i].vertexIndex" << indices_model[i].vertexIndex << '\n';*/
 				//normals by face
-				aux_vertex.Normal = normals_model[indices_model[i].normalIndex];
-				vertices[indices_model[i].vertexIndex].Normal = normalize(aux_vertex.Normal);
+				if (vertices.size() > indices_model[i].vertexIndex && normals_model.size()>indices_model[i].normalIndex)
+				{
+					aux_vertex.Normal = normals_model[indices_model[i].normalIndex];
+					vertices[indices_model[i].vertexIndex].Normal = aux_vertex.Normal;
+				}
 				//vertices.insert(vertices.begin() + indices_model[i].vertexIndex, aux_vertex);
 			}
 			if (textures_size > 0)
 			{
 				//std::cout << indices_model[i].vertexIndex + 1 << "/";
 				//std::cout << indices_model[i].uvIndex + 1 << "/normal" << '\n';
-				aux_vertex.TexCoords = textures_model[indices_model[i].uvIndex];
-				vertices[indices_model[i].vertexIndex].TexCoords = aux_vertex.TexCoords;
+				if (vertices.size() > indices_model[i].vertexIndex && textures_model.size()> indices_model[i].uvIndex)
+				{
+					aux_vertex.TexCoords = textures_model[indices_model[i].uvIndex];
+					vertices[indices_model[i].vertexIndex].TexCoords = aux_vertex.TexCoords;
+				}
 				//std::cout << "Textures:" << glm::to_string(vertices[indices_model[i].vertexIndex].TexCoords) << '\n';
 				//vertices.insert(vertices.begin() + indices_model[i].vertexIndex, aux_vertex);
 			}
@@ -160,13 +166,13 @@ namespace CG
 			//std::cout << indices_model[i].uvIndex << " " << '\n';
 		}
 		//std::cout << "indices_size_model: " << indices.size() << '\n';
-		//for (int i = 0; i < vertices_size; i++)
-		//{
-		//	std::cout << i << '\n';
-		//	std::cout << "Position:" << glm::to_string(vertices[i].Position) << '\n';
-		//	//std::cout << "Normals:" << glm::to_string(vertices[i].Normal) << '\n';
-		//	std::cout << "Textures:" << glm::to_string(vertices[i].TexCoords) << '\n';
-		//}
+		/*for (int i = 0; i < vertices_size; i++)
+		{
+			std::cout << i << '\n';
+			std::cout << "Position:" << glm::to_string(vertices[i].Position) << '\n';
+			std::cout << "Normals:" << glm::to_string(vertices[i].Normal) << '\n';
+			std::cout << "Textures:" << glm::to_string(vertices[i].TexCoords) << '\n';
+		}*/
 
 		Mesh *mesh = new Mesh();
 		mesh->MeshCreate(vertices, indices);

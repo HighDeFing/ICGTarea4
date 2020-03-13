@@ -14,7 +14,7 @@
 #include "shaders/Shader.h"
 
 using std::vector;
-extern Shader *bwShader;
+extern Shader *bwShader; //shader of objects
 
 struct Vertex {
 	glm::vec3 Position;
@@ -36,17 +36,20 @@ public:
 	bool back_face_culling;
 	bool zbuffer;
 	bool relleno;
+	bool texture_drawing = false;
 	bool texture_with_color;
+	bool only_color = true;
+	bool only_texture;
 	glm::vec4 colorrelleno = { 0.4f,0.7f,0.0f,0.5f };
 	glm::vec4 colormesh = { 1.0f,1.0f,1.0f,1.0f };
-	glm::vec4 colorpoints = { 0.0f,0.0f,0.0f,0.0f};
-	glm::mat4 modelMatrix;
+	glm::vec4 colorpoints = { 0.0f,0.0f,0.0f,0.0f };
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
 	glm::mat4 proj;
 	glm::mat4 view;
 	glm::quat Qrotacion;
 
 	float vec4fscale[4]= { 0.5f, 0.5f, 0.5f, 0.5f };
-	float vec4ftraslate[4];
+	float vec4ftraslate[4] = { 0.0f,0.0f,0.0f,0.0f };
 
 	void MeshCreate(vector<Vertex> vertices, vector<unsigned int> indices);
 	void Draw();
