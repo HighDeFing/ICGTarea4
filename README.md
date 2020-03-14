@@ -23,7 +23,7 @@ Acá solo se utiliza la API de EasyDIPAPI para trabajar en la app
 # Para ejecutar:
 
 Los modelos tanto las texturas se cargan dinamicamente.
-Se puede colocar luz, para apagarla se pagan todas sus formas, especular, ambiental y difusa.
+Se puede colocar luz, para apagarla se apagan todas sus formas, especular, ambiental y difusa.
 
 
 
