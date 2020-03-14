@@ -117,6 +117,7 @@ mat4 viewMatrix;
 //light1 bool
 bool only_one_light1 =  false;
 
+static float light_col[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 static float col2[4] = { 0.4f,0.7f,0.0f,0.5f };
 static float col1[4] = { 0.2f,0.3f,0.3f,1.0f};
 static float col4[4] = { 0.0f,0.0f,0.0f,0.0f };
@@ -156,7 +157,15 @@ float lastX = 800.0f / 2.0;
 float lastY = 600.0 / 2.0;
 float fov = 45.0f;
 
+bool zbuffer = false;
 bool move;
+
+//INTENSIDAD DE LUZ
+static float intensity_ambiental = 0.8f;
+static float intensity_specular = 0.8f;
+
+//TEXTURE MODE
+int texture_mode = 0;
 
 Application::Application() {
 
@@ -295,8 +304,8 @@ void Application::MainLoop()
 		ImGui::NewFrame();
 
 		//Demo
-		/*if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);*/
+		if (show_demo_window)
+			ImGui::ShowDemoWindow(&show_demo_window);
 
 		// Get mouse position
 		float currentFrame = glfwGetTime();
@@ -414,10 +423,12 @@ void Application::Render()
 		{
 			if (bwShader) {
 				bwShader->use();
+				bwShader->setVec3("cameraPos", cameraPos);
 				//glActiveTexture(0);
 				//glBindTexture(GL_TEXTURE_2D, texId);
 				//bwShader->setInt("tex", 0);
 				//bwShader->setFloat("test", test);
+				model[i]->setmodelMatrix();
 				model[i]->BindTexture();
 				model[i]->Bind();
 				model[i]->setView(view);
@@ -496,7 +507,7 @@ void Application::ImGui()
 	{
 		firstMouse = true;
 	}
-	ImGui::SameLine(); HelpMarker("Press Esc to leave camara mode\n");
+	ImGui::SameLine(); HelpMarker("Press Esc to leave camara mode and M to enter use WASD to move\n");
 	if (ImGui::CollapsingHeader("Opciones de textura:"))
 	{
 		if (!model.empty() && picked < model.size() && picked >= 0)
@@ -513,27 +524,29 @@ void Application::ImGui()
 			ImGui::Checkbox("Habilitar Textura", &model[picked]->texture_drawing);
 			if (model[picked]->texture_drawing) 
 			{
-				static int item_current_2 = 0;
+
 				ImGui::Text("Variaciones de Textura:");
-				ImGui::Combo("", &item_current_2, "Textura con color\0Solo color\0Solo textura\0\0");
-				if (item_current_2 == 0) 
+				texture_mode = model[picked]->texture_mode;
+				ImGui::Combo("", &texture_mode, "Textura con color\0Solo color\0Solo textura\0\0");
+				if (texture_mode == 0)
 				{
 					model[picked]->texture_with_color = true;
 					model[picked]->only_color = false;
 					model[picked]->only_texture = false;
 				}
-				if (item_current_2 == 1)
+				if (texture_mode == 1)
 				{
 					model[picked]->only_color = true;
 					model[picked]->texture_with_color = false;
 					model[picked]->only_texture = false;
 				}
-				if (item_current_2 == 2)
+				if (texture_mode == 2)
 				{
 					model[picked]->only_texture = true;
 					model[picked]->texture_with_color = false;
 					model[picked]->only_color = false;
 				}
+				model[picked]->texture_mode = texture_mode;
 			}
 			/*ImGui::Checkbox("Textura con color", &model[picked]->texture_with_color);
 			if (model[picked]->texture_with_color)
@@ -570,9 +583,32 @@ void Application::ImGui()
 		}
 		if (only_one_light1)
 		{
+			light_col[0] = lights->colorrelleno[0];
+			light_col[1] = lights->colorrelleno[1];
+			light_col[2] = lights->colorrelleno[2];
+			light_col[3] = lights->colorrelleno[3];
+			ImGui::Text("Color de la luz");
+			ImGui::SameLine(); HelpMarker("Click on the colored square to open a color picker.\nClick and hold to use drag and drop.\nRight-click on the colored square to show options.\nCTRL+click on individual component to input value.\n");
+			ImGui::ColorEdit4("Color Light", light_col);
+			lights->colorrelleno = glm::vec4(light_col[0], light_col[1], light_col[2], light_col[3]);
+
+			ImGui::Separator();
+
 			//Ambient or diffuse
-			ImGui::Checkbox("Ambiental", &lights->bambient);
-			ImGui::Checkbox("Difusa", &lights->bdiffuse);
+			ImGui::Checkbox("Ambiental", &lights->bambient); ImGui::SameLine();
+			ImGui::Checkbox("Difusa", &lights->bdiffuse); ImGui::SameLine(); 
+			ImGui::Checkbox("Especular", &lights->bspecular);
+
+			ImGui::Text("Intensidad Ambiental:");
+			intensity_ambiental = lights->intensity_ambiental;
+			ImGui::SliderFloat("Drag Intensidad Ambiental", &intensity_ambiental, 0.0f, 1.0f, "ratio = %.05f");
+			lights->intensity_ambiental = intensity_ambiental;
+			intensity_specular = lights->intensity_specular;
+			ImGui::Text("Intensidad Especular:");
+			ImGui::SliderFloat("Drag Intensidad Especular", &intensity_specular, 0.0f, 1.0f, "ratio = %.05f");
+			lights->intensity_specular = intensity_specular;
+
+			ImGui::Separator();
 
 			//Traslate, scale
 			ImGui::Text("X, Y, Z");
@@ -667,8 +703,9 @@ void Application::ImGui()
 			model[picked]->colorpoints = glm::vec4(col4[0], col4[1], col4[2], col4[3]);
 			model[picked]->colorrelleno = glm::vec4(col2[0], col2[1], col2[2], col2[3]);
 
+			ImGui::Separator();
 			//rotate
-			modelMatrix = model[picked]->modelMatrix;
+			//modelMatrix = model[picked]->modelMatrix;
 			ImGui::Text("Red is X, Green is Y, Blue is Z");
 			ImGui::Checkbox("Rotate", &Iwant_torotate);
 			if (Iwant_torotate)
@@ -679,42 +716,44 @@ void Application::ImGui()
 			model[picked]->Qrotacion = qRot;
 			//Traslate, scale
 			ImGui::Text("X, Y, Z");
-			vec4fs[0] = model[picked]->vec4fscale[0];
-			vec4fs[1] = model[picked]->vec4fscale[1];
-			vec4fs[2] = model[picked]->vec4fscale[2];
+			vec4fs[0] = model[picked]->vec4fscale.x;
+			vec4fs[1] = model[picked]->vec4fscale.y;
+			vec4fs[2] = model[picked]->vec4fscale.z;
 			ImGui::DragFloat("SCALE X", &vec4fs[0], 0.01f);
 			ImGui::DragFloat("SCALE Y", &vec4fs[1], 0.01f);
 			ImGui::DragFloat("SCALE Z", &vec4fs[2], 0.01f);
-			model[picked]->vec4fscale[0] = vec4fs[0];
-			model[picked]->vec4fscale[1] = vec4fs[1];
-			model[picked]->vec4fscale[2] = vec4fs[2];
+			model[picked]->vec4fscale.x = vec4fs[0];
+			model[picked]->vec4fscale.y = vec4fs[1];
+			model[picked]->vec4fscale.z = vec4fs[2];
 			if (ImGui::DragFloat("SCALE ALL", &vec4fs[0], 0.01f, 0.0f))
 			{
 				vec4fs[1] = vec4fs[0];
 				vec4fs[2] = vec4fs[0];
 			}
-			model[picked]->vec4fscale[0] = vec4fs[0];
-			model[picked]->vec4fscale[1] = vec4fs[1];
-			model[picked]->vec4fscale[2] = vec4fs[2];
+			model[picked]->vec4fscale.x = vec4fs[0];
+			model[picked]->vec4fscale.y = vec4fs[1];
+			model[picked]->vec4fscale.z = vec4fs[2];
 
 			//ImGui::SliderFloat3("SCALE", vec4fs, 0.0f, 3.0f);
 			ImGui::Text("X, Y, Z");
-			vec4ft[0] = model[picked]->vec4ftraslate[0];
-			vec4ft[1] = model[picked]->vec4ftraslate[1];
-			vec4ft[2] = model[picked]->vec4ftraslate[2];
+			vec4ft[0] = model[picked]->vec4ftraslate.x;
+			vec4ft[1] = model[picked]->vec4ftraslate.y;
+			vec4ft[2] = model[picked]->vec4ftraslate.z;
 			ImGui::DragFloat("TRASLATE X", &vec4ft[0], 0.02f);
 			ImGui::DragFloat("TRASLATE Y", &vec4ft[1], 0.02f);
 			ImGui::DragFloat("TRASLATE Z", &vec4ft[2], 0.02f);
-			model[picked]->vec4ftraslate[0] = vec4ft[0];
-			model[picked]->vec4ftraslate[1] = vec4ft[1];
-			model[picked]->vec4ftraslate[2] = vec4ft[2];
+			model[picked]->vec4ftraslate.x = vec4ft[0];
+			model[picked]->vec4ftraslate.y = vec4ft[1];
+			model[picked]->vec4ftraslate.z = vec4ft[2];
 			//ImGui::SliderFloat3("TRASLATE", vec4ft, -2.0f, 2.0f, "ratio = %.01f");
-			glm::vec3 auxs(vec4fs[0], vec4fs[1], vec4fs[2]);
+			/*glm::vec3 auxs(vec4fs[0], vec4fs[1], vec4fs[2]);
 			glm::vec3 auxt(vec4ft[0], vec4ft[1], vec4ft[2]);
 			modelMatrix = mat4_cast(model[picked]->Qrotacion);
 			modelMatrix = glm::translate(modelMatrix, auxt);
 			modelMatrix = glm::scale(modelMatrix, auxs);
-			model[picked]->setmodelMatrix(modelMatrix);
+			model[picked]->setmodelMatrix(modelMatrix);*/
+
+			ImGui::Separator();
 
 			ImGui::Checkbox("Mallado", &model[picked]->mallado);
 			ImGui::Checkbox("Puntos", &model[picked]->points);
@@ -724,7 +763,21 @@ void Application::ImGui()
 			{
 				NCP = 0.0f;
 			}
-			ImGui::Checkbox("Z-buffer", &model[picked]->zbuffer);
+			else
+			{
+				NCP = 0.01f;
+			}
+			ImGui::Checkbox("Z-buffer", &zbuffer);
+			if (zbuffer) 
+			{
+				glEnable(GL_DEPTH_TEST);
+				//glDepthMask(GL_FALSE);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			} else
+				{
+				glDisable(GL_DEPTH_TEST);
+				}
+
 		}
 	}
 

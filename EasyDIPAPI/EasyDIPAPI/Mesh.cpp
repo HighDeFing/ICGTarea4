@@ -60,6 +60,9 @@ void Mesh::setupMesh()
 	//{
 	//	std::cout<<indices[i];
 	//}
+	vec4ftraslate[0] = vec4ftraslate[1] = vec4ftraslate[2] = 0.0f;
+	vec4fscale[0] = vec4fscale[1] = vec4fscale[2] = vec4fscale[3] = 1.0f;
+	Qrotacion = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -147,14 +150,14 @@ void Mesh::Draw()
 	bwShader->setBool("only_color", only_color);
 	bwShader->setBool("only_texture", only_texture);
 	//light shader
-	if (zbuffer) {
-		glEnable(GL_DEPTH_TEST);
-		//glDepthMask(GL_FALSE);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-	else{
-		glDisable(GL_DEPTH_TEST);
-	}
+	//if (zbuffer) {
+	//	glEnable(GL_DEPTH_TEST);
+	//	//glDepthMask(GL_FALSE);
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//}
+	//else{
+	//	glDisable(GL_DEPTH_TEST);
+	//}
 	if(back_face_culling)
 	{
 		glEnable(GL_CULL_FACE);
@@ -220,9 +223,21 @@ void Mesh::setView(glm::mat4 input)
 	view = input;
 }
 
-void Mesh::setmodelMatrix(glm::mat4 input)
+void Mesh::setmodelMatrix()
 {
-	modelMatrix = input;
+	glm::mat4 R = mat4_cast(Qrotacion);
+	glm::mat4 S;
+	if (vec4fscale.w != 1.0f)
+	{
+		S = glm::scale(glm::vec3(vec4fscale.w, vec4fscale.w, vec4fscale.w));
+	}
+	else {
+		S = glm::scale(glm::vec3(vec4fscale.x, vec4fscale.y, vec4fscale.z));
+	}
+
+	glm::mat4 T = glm::translate(vec4ftraslate);
+	modelMatrix = T * S * R;
+
 }
 
 void Mesh::setproj(glm::mat4 input)

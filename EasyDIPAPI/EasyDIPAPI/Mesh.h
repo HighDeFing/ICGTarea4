@@ -7,6 +7,8 @@
 #include "glm/gtx/string_cast.hpp"
 #include "EDpch.h"
 #include <glm/vec3.hpp>
+#include "glm/gtc/quaternion.hpp"
+#include "glm/gtx/transform.hpp"
 #include <glm/glm.hpp>
 #include <filesystem> 
 #include <vector>
@@ -40,6 +42,8 @@ public:
 	bool texture_with_color;
 	bool only_color = true;
 	bool only_texture;
+	int texture_mode = 0; 
+
 	glm::vec4 colorrelleno = { 0.4f,0.7f,0.0f,0.5f };
 	glm::vec4 colormesh = { 1.0f,1.0f,1.0f,1.0f };
 	glm::vec4 colorpoints = { 0.0f,0.0f,0.0f,0.0f };
@@ -48,8 +52,8 @@ public:
 	glm::mat4 view;
 	glm::quat Qrotacion;
 
-	float vec4fscale[4]= { 0.5f, 0.5f, 0.5f, 0.5f };
-	float vec4ftraslate[4] = { 0.0f,0.0f,0.0f,0.0f };
+	glm::vec4 vec4fscale;
+	glm::vec3 vec4ftraslate;
 
 	void MeshCreate(vector<Vertex> vertices, vector<unsigned int> indices);
 	void Draw();
@@ -57,7 +61,7 @@ public:
 	void setupMesh();
 	void DrawNormals();
 	void create_BoundingBox(glm::vec3 min, glm::vec3 max);
-	void setmodelMatrix(glm::mat4);
+	void setmodelMatrix();
 	void setproj(glm::mat4);
 	void setView(glm::mat4);
 	void loadCreateTexture(const char*);

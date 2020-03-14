@@ -32,6 +32,9 @@ public:
 	bool relleno = true;
 	bool bambient = true;
 	bool bdiffuse = false;
+	bool bspecular = false;
+	float intensity_ambiental;
+	float intensity_specular;
 	glm::vec4 colorrelleno = glm::vec4(1.0f);
 	glm::vec4 colormesh = glm::vec4(1.0f);
 	glm::vec4 colorpoints = glm::vec4(1.0f);

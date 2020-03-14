@@ -95,10 +95,12 @@ void Light::Bind()
 
 void Light::Connect_shader()
 {
-	
+	bwShader->setFloat("intensity_ambiental", intensity_ambiental);
+	bwShader->setFloat("intensity_specular", intensity_specular);
 	bwShader->setBool("bambient", bambient);
 	bwShader->setBool("bdiffuse", bdiffuse);
-	bwShader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+	bwShader->setBool("bspecular", bspecular);
+	bwShader->setVec3("lightColor", glm::vec3(colorrelleno[0], colorrelleno[1], colorrelleno[2]));
 	bwShader->setVec3("lightPos", glm::vec3(vec4ftraslate[0], vec4ftraslate[1], vec4ftraslate[2]));
 
 }
@@ -109,6 +111,7 @@ void Light::Draw()
 	lampShader->setMat4("mModel", modelMatrix);
 	lampShader->setMat4("mView", view);
 	lampShader->setMat4("mProj", proj);
+	lampShader->setVec4("my_color", colorrelleno);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	//glBindVertexArray(lightVAO);
