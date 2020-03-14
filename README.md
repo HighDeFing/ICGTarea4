@@ -22,11 +22,12 @@ Acá solo se utiliza la API de EasyDIPAPI para trabajar en la app
 
 # Para ejecutar:
 
-Guardar en la carpeta Modelo el archivo a desplegar con el nombre `modelo.off` o `modelo.obj`
+Los modelos tanto las texturas se cargan dinamicamente.
+Se puede colocar luz, para apagarla se pagan todas sus formas, especular, ambiental y difusa.
 
-## Mover el near clipping plane para cortar al objeto de frente.
 
-Se puede rotar el objeto y mover hacia el frente. Dependiendo de la direccion del objeto (el gizmo) dependeran las demas transformaciones.
+
+
 
 
 
